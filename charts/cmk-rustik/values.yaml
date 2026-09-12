@@ -194,8 +194,32 @@ metricsCache:
     pullPort: 10050
     # intraClusterPort is the port exposed by the ingestion Service.
     intraClusterPort: 10049
-    # nodePort is the external pull port and is required when type is NodePort.
+    # externalTrafficPolicy controls source IP preservation for NodePort and
+    # LoadBalancer Services. Local only forwards to nodes running metrics-cache.
+    externalTrafficPolicy: Cluster
+    # loadBalancerClass selects a load balancer implementation, if needed.
+    loadBalancerClass: ""
+    # loadBalancerSourceRanges restricts clients of a LoadBalancer Service.
+    loadBalancerSourceRanges: []
+    # nodePort optionally selects a fixed port; otherwise Kubernetes assigns it.
     nodePort: null
+
+  # ingress exposes the pull Service using an installed Ingress controller.
+  # TLS here terminates at the controller. With pull.encryption.enabled, also
+  # configure the controller's HTTPS backend and certificate trust explicitly.
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    # hosts lists DNS names and paths. Use / unless your controller rewrites
+    # paths: metrics-cache serves its endpoints at their original paths.
+    hosts:
+      - host: rustik.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    # tls references TLS Secrets in the release namespace.
+    tls: []
 
   # resources lets you limit and request cluster resources for metrics-cache.
   # see: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -346,7 +370,8 @@ pull:
   # empty, metrics-cache creates and reuses a Secret containing a CA and server
   # certificate. If existingSecret is set, it must already exist and contain
   # tls.crt and tls.key; metrics-cache will not generate or replace it.
-  # When the pull Service is a NodePort, existingSecret is required because the
+  # When the pull Service is a NodePort or LoadBalancer, existingSecret is
+  # required because the
   # generated certificate only contains cluster-internal DNS names.
   encryption:
     enabled: false

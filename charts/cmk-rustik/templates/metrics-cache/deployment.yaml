@@ -1,9 +1,9 @@
 {{- if and
   .Values.pull.encryption.enabled
-  (eq .Values.metricsCache.service.type "NodePort")
+  (or (eq .Values.metricsCache.service.type "NodePort") (eq .Values.metricsCache.service.type "LoadBalancer"))
   (not .Values.pull.encryption.existingSecret)
 }}
-{{- fail "pull.encryption.existingSecret is required when pull encryption is enabled and metricsCache.service.type is NodePort (the generated certificate only covers cluster-internal DNS names)" }}
+{{- fail "pull.encryption.existingSecret is required when pull encryption is enabled and metricsCache.service.type is NodePort or LoadBalancer (the generated certificate only covers cluster-internal DNS names)" }}
 {{- end }}
 {{- if and .Values.namespaceFilter.includePatterns .Values.namespaceFilter.excludePatterns }}
 {{- fail "namespaceFilter.includePatterns and namespaceFilter.excludePatterns are mutually exclusive" }}

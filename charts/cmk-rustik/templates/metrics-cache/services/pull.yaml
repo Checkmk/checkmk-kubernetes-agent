@@ -10,13 +10,25 @@ metadata:
   {{- end }}
 spec:
   type: {{ .Values.metricsCache.service.type }}
+  {{- if or (eq .Values.metricsCache.service.type "NodePort") (eq .Values.metricsCache.service.type "LoadBalancer") }}
+  externalTrafficPolicy: {{ .Values.metricsCache.service.externalTrafficPolicy }}
+  {{- end }}
+  {{- if eq .Values.metricsCache.service.type "LoadBalancer" }}
+  {{- with .Values.metricsCache.service.loadBalancerClass }}
+  loadBalancerClass: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.metricsCache.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
   selector:
     app: {{ include "rustik.fullname" . }}-metrics-cache
   ports:
     - name: pull
       port: {{ .Values.metricsCache.service.pullPort }}
       targetPort: pull
-      {{- if eq .Values.metricsCache.service.type "NodePort" }}
-      nodePort: {{ required "nodePort is required if service type is NodePort" .Values.metricsCache.service.nodePort }}
+      {{- if and .Values.metricsCache.service.nodePort (or (eq .Values.metricsCache.service.type "NodePort") (eq .Values.metricsCache.service.type "LoadBalancer")) }}
+      nodePort: {{ .Values.metricsCache.service.nodePort }}
       {{- end }}
       protocol: TCP
