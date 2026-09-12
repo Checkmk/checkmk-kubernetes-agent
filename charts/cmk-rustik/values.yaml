@@ -29,6 +29,11 @@ imagePullSecrets: []
 # node in the cluster, collecting (or "fetching") metrics about the node's
 # kubelet and running the Checkmk agent on the node.
 metricsFetcher:
+  # networkInterfaceMonitoring mounts the node's /sys at /host/sys, read-only,
+  # for the bundled Checkmk network-interface plugin. Requires hostPath access.
+  networkInterfaceMonitoring:
+    enabled: false
+
   # serviceAccount configures the component's Kubernetes identity.
   # Existing accounts still receive the chart's RBAC bindings. Use different
   # accounts for cache and fetcher to keep their permissions separate.

@@ -43,8 +43,14 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if or .Values.metricsFetcher.extraVolumes .Values.intraClusterCommunication.encryption.enabled }}
+      {{- if or .Values.metricsFetcher.extraVolumes .Values.intraClusterCommunication.encryption.enabled .Values.metricsFetcher.networkInterfaceMonitoring.enabled }}
       volumes:
+        {{- if .Values.metricsFetcher.networkInterfaceMonitoring.enabled }}
+        - name: host-sys
+          hostPath:
+            path: /sys
+            type: Directory
+        {{- end }}
         {{- with .Values.metricsFetcher.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -95,8 +101,13 @@ spec:
                   fieldPath: spec.nodeName
             - name: RUST_LOG
               value: {{ .Values.metricsFetcher.logLevel | default .Values.logLevel }}
-          {{- if or .Values.metricsFetcher.extraVolumeMounts .Values.intraClusterCommunication.encryption.enabled }}
+          {{- if or .Values.metricsFetcher.extraVolumeMounts .Values.intraClusterCommunication.encryption.enabled .Values.metricsFetcher.networkInterfaceMonitoring.enabled }}
           volumeMounts:
+            {{- if .Values.metricsFetcher.networkInterfaceMonitoring.enabled }}
+            - name: host-sys
+              mountPath: /host/sys
+              readOnly: true
+            {{- end }}
             {{- with .Values.metricsFetcher.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
