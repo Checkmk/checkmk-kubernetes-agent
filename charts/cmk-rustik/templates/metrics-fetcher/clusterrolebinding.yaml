@@ -10,5 +10,5 @@ roleRef:
   name: {{ include "rustik.fullname" . }}-metrics-fetcher
 subjects:
   - kind: ServiceAccount
-    name: {{ include "rustik.fullname" . }}-metrics-fetcher
+    name: {{ include "rustik.serviceAccountName" (dict "root" . "component" "metrics-fetcher" "serviceAccount" .Values.metricsFetcher.serviceAccount) }}
     namespace: {{ .Release.Namespace }}

@@ -22,10 +22,37 @@ clusterHostName: ""
 # metricsFetcher.logLevel.
 logLevel: info
 
+# imagePullSecrets references registry credentials in the release namespace.
+imagePullSecrets: []
+
 # metricsFetcher defines settings that control the daemon running on each
 # node in the cluster, collecting (or "fetching") metrics about the node's
 # kubelet and running the Checkmk agent on the node.
 metricsFetcher:
+  # serviceAccount configures the component's Kubernetes identity.
+  # Existing accounts still receive the chart's RBAC bindings. Use different
+  # accounts for cache and fetcher to keep their permissions separate.
+  serviceAccount:
+    create: true
+    # name defaults to the component's generated name, even if create is false.
+    name: ""
+    annotations: {}
+
+  # podSecurityContext applies to all containers in the Pod.
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    runAsGroup: 10001
+    seccompProfile:
+      type: RuntimeDefault
+  # securityContext applies to the component container.
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
   # tolerations allows scheduling on tainted nodes, e.g. control-plane nodes.
   tolerations: []
   # affinity accepts Kubernetes node affinity and Pod (anti-)affinity rules.
@@ -67,6 +94,8 @@ metricsFetcher:
     repository: ghcr.io/checkmk/cmk-rustik-metrics-fetcher
     # tag is the image tag or version to use. It defaults to the app version.
     tag: ""
+    # digest pins an immutable image (e.g. sha256:...). Takes precedence over tag.
+    digest: ""
     # pullPolicy defines when and if Kubernetes should repull.
     pullPolicy: IfNotPresent
 
@@ -97,6 +126,30 @@ metricsFetcher:
 # metricsCache defines settings that control the daemon caching all information
 # about the cluster and serving that information to Checkmk for monitoring.
 metricsCache:
+  # serviceAccount configures the component's Kubernetes identity.
+  # Existing accounts still receive the chart's RBAC bindings. Use different
+  # accounts for cache and fetcher to keep their permissions separate.
+  serviceAccount:
+    create: true
+    # name defaults to the component's generated name, even if create is false.
+    name: ""
+    annotations: {}
+
+  # podSecurityContext applies to all containers in the Pod.
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    runAsGroup: 10001
+    seccompProfile:
+      type: RuntimeDefault
+  # securityContext applies to the component container.
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
   # nodeSelector controls where metrics-cache runs. Images require Linux.
   nodeSelector:
     kubernetes.io/os: linux
@@ -123,6 +176,8 @@ metricsCache:
     repository: ghcr.io/checkmk/cmk-rustik-metrics-cache
     # tag is the image tag or version to use. It defaults to the app version.
     tag: ""
+    # digest pins an immutable image (e.g. sha256:...). Takes precedence over tag.
+    digest: ""
     # pullPolicy defines when and if Kubernetes should repull.
     pullPolicy: IfNotPresent
 

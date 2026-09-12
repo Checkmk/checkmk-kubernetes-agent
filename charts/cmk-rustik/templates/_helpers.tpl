@@ -73,3 +73,17 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
+
+{{/* A digest pins the image even when a tag is also configured. */}}
+{{- define "rustik.image" -}}
+{{- if .image.digest -}}
+{{- printf "%s@%s" .image.repository .image.digest -}}
+{{- else -}}
+{{- printf "%s:%s" .image.repository (.image.tag | default .root.Chart.AppVersion) -}}
+{{- end -}}
+{{- end -}}
+
+{{/* Each component needs its own identity for ingestion authorization. */}}
+{{- define "rustik.serviceAccountName" -}}
+{{- default (printf "%s-%s" (include "rustik.fullname" .root) .component) .serviceAccount.name -}}
+{{- end -}}

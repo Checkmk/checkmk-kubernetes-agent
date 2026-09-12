@@ -38,7 +38,7 @@ spec:
       {{- with .Values.metricsFetcher.priorityClassName }}
       priorityClassName: {{ . | quote }}
       {{- end }}
-      serviceAccountName: {{ include "rustik.fullname" . }}-metrics-fetcher
+      serviceAccountName: {{ include "rustik.serviceAccountName" (dict "root" . "component" "metrics-fetcher" "serviceAccount" .Values.metricsFetcher.serviceAccount) }}
       {{- with .Values.metricsFetcher.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -57,10 +57,22 @@ spec:
                 path: intra-cluster-ca.crt
         {{- end }}
       {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.metricsFetcher.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: metrics-fetcher
-          image: {{ .Values.metricsFetcher.image.repository }}:{{ .Values.metricsFetcher.image.tag | default .Chart.AppVersion }}
+          image: {{ include "rustik.image" (dict "root" . "image" .Values.metricsFetcher.image) | quote }}
           imagePullPolicy: {{ .Values.metricsFetcher.image.pullPolicy }}
+          {{- with .Values.metricsFetcher.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           args:
             - --kubelet-stats-poll-interval={{ .Values.metricsFetcher.kubeletStatsPollInterval }}
             - --kubelet-health-poll-interval={{ .Values.metricsFetcher.kubeletHealthPollInterval }}

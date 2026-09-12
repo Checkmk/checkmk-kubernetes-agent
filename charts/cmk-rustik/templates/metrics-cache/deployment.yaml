@@ -53,15 +53,27 @@ spec:
       {{- with .Values.metricsCache.priorityClassName }}
       priorityClassName: {{ . | quote }}
       {{- end }}
-      serviceAccountName: {{ include "rustik.fullname" . }}-metrics-cache
+      serviceAccountName: {{ include "rustik.serviceAccountName" (dict "root" . "component" "metrics-cache" "serviceAccount" .Values.metricsCache.serviceAccount) }}
       {{- with .Values.metricsCache.extraVolumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.metricsCache.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: metrics-cache
-          image: {{ .Values.metricsCache.image.repository }}:{{ .Values.metricsCache.image.tag | default .Chart.AppVersion }}
+          image: {{ include "rustik.image" (dict "root" . "image" .Values.metricsCache.image) | quote }}
           imagePullPolicy: {{ .Values.metricsCache.image.pullPolicy }}
+          {{- with .Values.metricsCache.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           args:
             - --pull-address={{ .Values.metricsCache.pullAddress }}
             - --pull-port={{ .Values.metricsCache.pullPort }}
@@ -83,8 +95,8 @@ spec:
             - --ingest-service-name={{ include "rustik.fullname" . }}-metrics-cache-ingest
             {{- end }}
             {{- end }}
-            - --reader-allowlist={{ .Release.Namespace }}:{{ include "rustik.fullname" . }}-metrics-cache
-            - --writer-allowlist={{ .Release.Namespace }}:{{ include "rustik.fullname" . }}-metrics-fetcher
+            - --reader-allowlist={{ .Release.Namespace }}:{{ include "rustik.serviceAccountName" (dict "root" . "component" "metrics-cache" "serviceAccount" .Values.metricsCache.serviceAccount) }}
+            - --writer-allowlist={{ .Release.Namespace }}:{{ include "rustik.serviceAccountName" (dict "root" . "component" "metrics-fetcher" "serviceAccount" .Values.metricsFetcher.serviceAccount) }}
             - --metrics-fetcher-daemonset-name={{ include "rustik.fullname" . }}-metrics-fetcher
             - --cluster-name={{ required "clusterName is required (there is no safe default: it names every generated host)" .Values.clusterName }}
             - --cluster-host-name={{ required "clusterHostName is required (it must exactly match the Checkmk host representing this cluster)" .Values.clusterHostName }}
