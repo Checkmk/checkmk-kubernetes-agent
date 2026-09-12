@@ -64,3 +64,12 @@ secret
 {{- printf "%s-pull-ca" (include "rustik.fullname" .) -}}
 {{- end -}}
 {{- end -}}
+
+{{/* Standard resource labels. Keep version labels out of selectors. */}}
+{{- define "rustik.labels" -}}
+helm.sh/chart: {{ include "rustik.chart" . }}
+app.kubernetes.io/name: {{ include "rustik.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}

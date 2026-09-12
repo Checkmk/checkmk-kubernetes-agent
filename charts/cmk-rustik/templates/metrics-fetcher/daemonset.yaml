@@ -1,6 +1,8 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
+  labels:
+    {{- include "rustik.labels" . | nindent 4 }}
   name: {{ include "rustik.fullname" . }}-metrics-fetcher
 spec:
   selector:
@@ -8,8 +10,17 @@ spec:
       app: {{ include "rustik.fullname" . }}-metrics-fetcher
   template:
     metadata:
+      {{- with .Values.metricsFetcher.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
+        {{- include "rustik.labels" . | nindent 8 }}
+        app.kubernetes.io/component: metrics-fetcher
         app: {{ include "rustik.fullname" . }}-metrics-fetcher
+        {{- with .Values.metricsFetcher.podLabels }}
+        {{- toYaml (omit . "app" "helm.sh/chart" "app.kubernetes.io/name" "app.kubernetes.io/instance" "app.kubernetes.io/version" "app.kubernetes.io/managed-by" "app.kubernetes.io/component") | nindent 8 }}
+        {{- end }}
     spec:
       serviceAccountName: {{ include "rustik.fullname" . }}-metrics-fetcher
       {{- with .Values.metricsFetcher.nodeSelector }}

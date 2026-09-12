@@ -1,6 +1,8 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
+  labels:
+    {{- include "rustik.labels" . | nindent 4 }}
   name: {{ include "rustik.fullname" . }}-metrics-fetcher
 roleRef:
   apiGroup: rbac.authorization.k8s.io

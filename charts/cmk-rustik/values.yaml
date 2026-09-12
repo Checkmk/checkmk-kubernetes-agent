@@ -1,3 +1,8 @@
+# nameOverride overrides the chart name used in resource names.
+nameOverride: ""
+# fullnameOverride overrides the release's resource-name prefix.
+fullnameOverride: ""
+
 # clusterName is the name which is part of every piggyback host that gets
 # created in Checkmk as a result of monitoring this cluster. If migrating from
 # the legacy Kubernetes monitoring, it should _exactly_ match what was in your
@@ -21,6 +26,11 @@ logLevel: info
 # node in the cluster, collecting (or "fetching") metrics about the node's
 # kubelet and running the Checkmk agent on the node.
 metricsFetcher:
+  # podAnnotations adds annotations to Pods.
+  podAnnotations: {}
+  # podLabels adds Pod labels. Chart-owned labels take precedence.
+  podLabels: {}
+
   # kubeletStatsPollInterval is how often, in seconds, kubelet stats are polled.
   # Must be a whole number greater than zero. Keep this below
   # metricsCache.kubeletStatsCacheTtl so samples do not expire between polls.
@@ -76,6 +86,11 @@ metricsFetcher:
 # metricsCache defines settings that control the daemon caching all information
 # about the cluster and serving that information to Checkmk for monitoring.
 metricsCache:
+  # podAnnotations adds annotations to Pods.
+  podAnnotations: {}
+  # podLabels adds Pod labels. Chart-owned labels take precedence.
+  podLabels: {}
+
   # image allows you to override the metrics-cache container image properties.
   image:
     # repository is the registry path and image name, without the tag.
@@ -89,6 +104,10 @@ metricsCache:
   # of metrics-cache. The pull Service may be exposed as a NodePort; the
   # intra-cluster ingestion Service is always a ClusterIP.
   service:
+    # annotations configures the pull Service, e.g. for cloud load balancers.
+    annotations: {}
+    # ingestAnnotations configures the internal ingestion Service.
+    ingestAnnotations: {}
     type: ClusterIP
     # pullPort is the port exposed by the pull Service.
     pullPort: 10050

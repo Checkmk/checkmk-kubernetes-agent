@@ -11,6 +11,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  labels:
+    {{- include "rustik.labels" . | nindent 4 }}
   name: {{ include "rustik.fullname" . }}-metrics-cache
 spec:
   replicas: 1
@@ -19,8 +21,17 @@ spec:
       app: {{ include "rustik.fullname" . }}-metrics-cache
   template:
     metadata:
+      {{- with .Values.metricsCache.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
+        {{- include "rustik.labels" . | nindent 8 }}
+        app.kubernetes.io/component: metrics-cache
         app: {{ include "rustik.fullname" . }}-metrics-cache
+        {{- with .Values.metricsCache.podLabels }}
+        {{- toYaml (omit . "app" "helm.sh/chart" "app.kubernetes.io/name" "app.kubernetes.io/instance" "app.kubernetes.io/version" "app.kubernetes.io/managed-by" "app.kubernetes.io/component") | nindent 8 }}
+        {{- end }}
     spec:
       serviceAccountName: {{ include "rustik.fullname" . }}-metrics-cache
       {{- with .Values.metricsCache.extraVolumes }}

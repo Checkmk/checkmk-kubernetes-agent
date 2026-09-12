@@ -1,7 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
+  labels:
+    {{- include "rustik.labels" . | nindent 4 }}
   name: {{ include "rustik.fullname" . }}-metrics-cache-ingest
+  {{- with .Values.metricsCache.service.ingestAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: ClusterIP
   selector:
