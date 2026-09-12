@@ -33,10 +33,12 @@ jobs:
           curl -sSL https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz | \
             tar xz -C /usr/local/bin kubeconform
       - name: Run kubeconform
+        shell: bash
         run: |
-          helm template rustik charts/cmk-rustik \
-            -f charts/cmk-rustik/ci/ci-values.yaml | \
-            kubeconform -strict -summary -kubernetes-version 1.36.0 -
+          for values in charts/cmk-rustik/ci/*-values.yaml; do
+            helm template rustik charts/cmk-rustik -f "$values" | \
+              kubeconform -strict -summary -kubernetes-version 1.36.0 -
+          done
       - name: Run chart-testing (lint)
         run: ct lint --all
       # The install test uses the dev images: they skip the (slow, in-Docker)

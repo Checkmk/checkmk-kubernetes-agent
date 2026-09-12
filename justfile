@@ -60,8 +60,11 @@ kind-dev-teardown:
 
 # Run kubeconform and ct lint over the helm chart
 lint-helm:
-    helm template ./charts/cmk-rustik/ -f charts/cmk-rustik/ci/ci-values.yaml \
-      | kubeconform
+    #!/usr/bin/env bash
+    set -euo pipefail
+    for values in charts/cmk-rustik/ci/*-values.yaml; do
+      helm template rustik charts/cmk-rustik -f "$values" | kubeconform -strict -summary
+    done
     ct lint --all
 
 # Run a rough subset of what runs in CI

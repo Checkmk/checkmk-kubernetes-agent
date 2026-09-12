@@ -30,8 +30,8 @@ spec:
         {{- include "rustik.labels" . | nindent 8 }}
         app.kubernetes.io/component: metrics-cache
         app: {{ include "rustik.fullname" . }}-metrics-cache
-        {{- with .Values.metricsCache.podLabels }}
-        {{- toYaml (omit . "app" "helm.sh/chart" "app.kubernetes.io/name" "app.kubernetes.io/instance" "app.kubernetes.io/version" "app.kubernetes.io/managed-by" "app.kubernetes.io/component") | nindent 8 }}
+        {{- with (omit .Values.metricsCache.podLabels "app" "helm.sh/chart" "app.kubernetes.io/name" "app.kubernetes.io/instance" "app.kubernetes.io/version" "app.kubernetes.io/managed-by" "app.kubernetes.io/component") }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
       {{- with .Values.metricsCache.nodeSelector }}

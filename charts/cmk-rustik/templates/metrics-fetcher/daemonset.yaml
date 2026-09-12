@@ -22,8 +22,8 @@ spec:
         {{- end }}
         app.kubernetes.io/component: metrics-fetcher
         app: {{ include "rustik.fullname" . }}-metrics-fetcher
-        {{- with .Values.metricsFetcher.podLabels }}
-        {{- toYaml (omit . "cloud.google.com/matching-allowlist" "app" "helm.sh/chart" "app.kubernetes.io/name" "app.kubernetes.io/instance" "app.kubernetes.io/version" "app.kubernetes.io/managed-by" "app.kubernetes.io/component") | nindent 8 }}
+        {{- with (omit .Values.metricsFetcher.podLabels "cloud.google.com/matching-allowlist" "app" "helm.sh/chart" "app.kubernetes.io/name" "app.kubernetes.io/instance" "app.kubernetes.io/version" "app.kubernetes.io/managed-by" "app.kubernetes.io/component") }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
       {{- with .Values.metricsFetcher.tolerations }}

@@ -385,8 +385,8 @@ pull:
   # certificate. If existingSecret is set, it must already exist and contain
   # tls.crt and tls.key; metrics-cache will not generate or replace it.
   # When the pull Service is a NodePort or LoadBalancer, existingSecret is
-  # required because the
-  # generated certificate only contains cluster-internal DNS names.
+  # required because the generated certificate only contains cluster-internal
+  # DNS names.
   encryption:
     enabled: false
     existingSecret: ""
