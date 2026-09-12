@@ -15,6 +15,7 @@ metadata:
     {{- include "rustik.labels" . | nindent 4 }}
   name: {{ include "rustik.fullname" . }}-metrics-cache
 spec:
+  minReadySeconds: {{ .Values.metricsCache.minReadySeconds }}
   replicas: 1
   selector:
     matchLabels:
@@ -33,6 +34,25 @@ spec:
         {{- toYaml (omit . "app" "helm.sh/chart" "app.kubernetes.io/name" "app.kubernetes.io/instance" "app.kubernetes.io/version" "app.kubernetes.io/managed-by" "app.kubernetes.io/component") | nindent 8 }}
         {{- end }}
     spec:
+      {{- with .Values.metricsCache.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.metricsCache.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.metricsCache.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.metricsCache.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.metricsCache.priorityClassName }}
+      priorityClassName: {{ . | quote }}
+      {{- end }}
       serviceAccountName: {{ include "rustik.fullname" . }}-metrics-cache
       {{- with .Values.metricsCache.extraVolumes }}
       volumes:

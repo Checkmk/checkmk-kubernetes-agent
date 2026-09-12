@@ -5,6 +5,7 @@ metadata:
     {{- include "rustik.labels" . | nindent 4 }}
   name: {{ include "rustik.fullname" . }}-metrics-fetcher
 spec:
+  minReadySeconds: {{ .Values.metricsFetcher.minReadySeconds }}
   selector:
     matchLabels:
       app: {{ include "rustik.fullname" . }}-metrics-fetcher
@@ -22,13 +23,26 @@ spec:
         {{- toYaml (omit . "app" "helm.sh/chart" "app.kubernetes.io/name" "app.kubernetes.io/instance" "app.kubernetes.io/version" "app.kubernetes.io/managed-by" "app.kubernetes.io/component") | nindent 8 }}
         {{- end }}
     spec:
+      {{- with .Values.metricsFetcher.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.metricsFetcher.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.metricsFetcher.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.metricsFetcher.priorityClassName }}
+      priorityClassName: {{ . | quote }}
+      {{- end }}
       serviceAccountName: {{ include "rustik.fullname" . }}-metrics-fetcher
       {{- with .Values.metricsFetcher.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      # hostNetwork: true
-      # dnsPolicy: ClusterFirstWithHostNet
       {{- if or .Values.metricsFetcher.extraVolumes .Values.intraClusterCommunication.encryption.enabled }}
       volumes:
         {{- with .Values.metricsFetcher.extraVolumes }}

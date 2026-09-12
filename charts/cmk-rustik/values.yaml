@@ -26,6 +26,17 @@ logLevel: info
 # node in the cluster, collecting (or "fetching") metrics about the node's
 # kubelet and running the Checkmk agent on the node.
 metricsFetcher:
+  # tolerations allows scheduling on tainted nodes, e.g. control-plane nodes.
+  tolerations: []
+  # affinity accepts Kubernetes node affinity and Pod (anti-)affinity rules.
+  affinity: {}
+  # topologySpreadConstraints spreads Pods across nodes or zones.
+  topologySpreadConstraints: []
+  # priorityClassName selects an existing PriorityClass.
+  priorityClassName: ""
+  # minReadySeconds is how long a Pod must be ready before it is available.
+  minReadySeconds: 0
+
   # podAnnotations adds annotations to Pods.
   podAnnotations: {}
   # podLabels adds Pod labels. Chart-owned labels take precedence.
@@ -78,7 +89,7 @@ metricsFetcher:
   nodeSelector:
     kubernetes.io/os: linux
 
-  # extraVolumes is volume definitions to add to the Pod in the Deployment.
+  # extraVolumes adds Kubernetes volume definitions to the Pod.
   extraVolumes: []
   # extraVolumeMounts is volume mounts to mount in the metrics-fetcher container.
   extraVolumeMounts: []
@@ -86,6 +97,21 @@ metricsFetcher:
 # metricsCache defines settings that control the daemon caching all information
 # about the cluster and serving that information to Checkmk for monitoring.
 metricsCache:
+  # nodeSelector controls where metrics-cache runs. Images require Linux.
+  nodeSelector:
+    kubernetes.io/os: linux
+
+  # tolerations allows scheduling on tainted nodes, e.g. control-plane nodes.
+  tolerations: []
+  # affinity accepts Kubernetes node affinity and Pod (anti-)affinity rules.
+  affinity: {}
+  # topologySpreadConstraints spreads Pods across nodes or zones.
+  topologySpreadConstraints: []
+  # priorityClassName selects an existing PriorityClass.
+  priorityClassName: ""
+  # minReadySeconds is how long a Pod must be ready before it is available.
+  minReadySeconds: 0
+
   # podAnnotations adds annotations to Pods.
   podAnnotations: {}
   # podLabels adds Pod labels. Chart-owned labels take precedence.
@@ -187,7 +213,7 @@ metricsCache:
   # persisted in the cache before expiring.
   kubeletHealthCacheTtl: 120
 
-  # extraVolumes is volume definitions to add to the Pod in the Deployment.
+  # extraVolumes adds Kubernetes volume definitions to the Pod.
   extraVolumes: []
   # extraVolumeMounts is volume mounts to mount in the metrics-cache container.
   extraVolumeMounts: []
