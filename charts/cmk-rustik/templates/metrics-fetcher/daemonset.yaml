@@ -89,7 +89,7 @@ spec:
             - --system-agent-timeout={{ .Values.metricsFetcher.systemAgentTimeout }}
             - --metrics-cache-namespace={{ .Release.Namespace }}
             - --metrics-cache-service={{ include "rustik.fullname" . }}-metrics-cache-ingest
-            - --metrics-cache-port={{ .Values.metricsCache.intraClusterPort }}
+            - --metrics-cache-port={{ .Values.metricsCache.service.intraClusterPort }}
             {{- if .Values.intraClusterCommunication.encryption.enabled }}
             - --metrics-cache-ca-cert-file=/etc/ssl/certs/intra-cluster-ca.crt
             {{- end }}

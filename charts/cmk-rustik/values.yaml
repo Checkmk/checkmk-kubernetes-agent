@@ -474,3 +474,24 @@ intraClusterCommunication:
     # longevity is the validity of an automatically generated CA and server
     # certificate, in days. It is ignored when existingSecret is set.
     longevity: 3650
+
+# networkPolicy requires a CNI plugin that enforces Kubernetes NetworkPolicies.
+networkPolicy:
+  # enabled restricts cache ingress to fetcher ingestion and pullFrom peers.
+  # Fetcher has no listening ports and receives no incoming connections.
+  enabled: false
+  # pullFrom is a list of NetworkPolicyPeer objects allowed to reach the pull
+  # listener, e.g. ipBlock CIDRs or namespaceSelector/podSelector pairs for an
+  # Ingress controller. Empty denies pull traffic when policies are enabled.
+  pullFrom: []
+  egress:
+    # enabled also restricts outgoing traffic. Fetcher -> cache is automatic;
+    # configure DNS, Kubernetes API, kubelet, push and OTel destinations below
+    # before enabling this.
+    enabled: false
+    # commonRules contains native NetworkPolicyEgressRule objects for both Pods.
+    commonRules: []
+    # metricsCacheRules adds cache egress, e.g. push receiver and OTLP collector.
+    metricsCacheRules: []
+    # metricsFetcherRules adds fetcher egress, e.g. node CIDRs on kubelet TCP 10250.
+    metricsFetcherRules: []
