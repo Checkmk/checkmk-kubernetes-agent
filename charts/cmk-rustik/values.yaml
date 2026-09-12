@@ -25,6 +25,15 @@ logLevel: info
 # imagePullSecrets references registry credentials in the release namespace.
 imagePullSecrets: []
 
+# gkeAutopilot selects an installed WorkloadAllowlist for metrics-fetcher.
+# Install the Rustik AllowlistSynchronizer and wait for it to become Ready
+# before deploying.
+gkeAutopilot:
+  enabled: false
+  # matchingAllowlist is the approved Rustik WorkloadAllowlist resource name.
+  # Required when enabled.
+  matchingAllowlist: ""
+
 # metricsFetcher defines settings that control the daemon running on each
 # node in the cluster, collecting (or "fetching") metrics about the node's
 # kubelet and running the Checkmk agent on the node.

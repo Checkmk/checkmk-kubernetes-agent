@@ -17,10 +17,13 @@ spec:
       {{- end }}
       labels:
         {{- include "rustik.labels" . | nindent 8 }}
+        {{- if .Values.gkeAutopilot.enabled }}
+        cloud.google.com/matching-allowlist: {{ required "gkeAutopilot.matchingAllowlist must name an installed Rustik WorkloadAllowlist" .Values.gkeAutopilot.matchingAllowlist | quote }}
+        {{- end }}
         app.kubernetes.io/component: metrics-fetcher
         app: {{ include "rustik.fullname" . }}-metrics-fetcher
         {{- with .Values.metricsFetcher.podLabels }}
-        {{- toYaml (omit . "app" "helm.sh/chart" "app.kubernetes.io/name" "app.kubernetes.io/instance" "app.kubernetes.io/version" "app.kubernetes.io/managed-by" "app.kubernetes.io/component") | nindent 8 }}
+        {{- toYaml (omit . "cloud.google.com/matching-allowlist" "app" "helm.sh/chart" "app.kubernetes.io/name" "app.kubernetes.io/instance" "app.kubernetes.io/version" "app.kubernetes.io/managed-by" "app.kubernetes.io/component") | nindent 8 }}
         {{- end }}
     spec:
       {{- with .Values.metricsFetcher.tolerations }}
