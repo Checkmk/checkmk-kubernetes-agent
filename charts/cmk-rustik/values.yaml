@@ -409,6 +409,11 @@ otel:
   # Do *not* include the signal path: "/v1/metrics" is appended for you.
   # Required when otel.enabled is true.
   endpoint: ""
+  tls:
+    # Optional existing Secret in the release namespace containing a PEM CA
+    # bundle in ca.crt, used in addition to default trusted CAs to verify the
+    # collector's certificate. Restart metrics-cache after changing the bundle.
+    caSecret: ""
   # interval is how often, in seconds, metrics are collected and exported to
   # the collector. Must be greater than zero.
   interval: 60

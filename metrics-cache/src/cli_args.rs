@@ -1,5 +1,6 @@
 use clap::Parser;
 use regex::Regex;
+use std::path::PathBuf;
 use std::time::Duration;
 use thiserror::Error;
 
@@ -260,6 +261,10 @@ pub struct CliArgs {
     /// Enable sending OTel metrics to the endpoint given
     #[arg(long)]
     pub otel_endpoint: Option<String>,
+
+    /// PEM CA bundle used to verify the OTel collector, in addition to default roots
+    #[arg(long, requires = "otel_endpoint")]
+    pub otel_ca_cert_file: Option<PathBuf>,
 
     /// Push interval in seconds for sending otel metrics.
     #[arg(

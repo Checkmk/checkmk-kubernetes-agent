@@ -1,8 +1,10 @@
 //! This module contains the OTel client, to export OTLP metrics to an OTel
 //! collector.
 
+use anyhow::Context;
 use opentelemetry_proto::tonic::collector::metrics::v1::ExportMetricsServiceRequest;
 use prost::Message;
+use std::path::Path;
 
 use crate::error::Result;
 use crate::otel::Error;
@@ -14,11 +16,23 @@ pub struct OtelClient {
 }
 
 impl OtelClient {
-    pub fn new(endpoint: &str) -> Self {
-        Self {
-            client: reqwest::Client::new(),
-            export_url: format!("{}/v1/metrics", endpoint.trim_end_matches('/')),
+    pub fn new(endpoint: &str, ca_cert_file: Option<&Path>) -> anyhow::Result<Self> {
+        let mut client = reqwest::Client::builder();
+        if let Some(path) = ca_cert_file {
+            let pem = std::fs::read(path)
+                .with_context(|| format!("could not read OTel CA bundle {}", path.display()))?;
+            let certificates = reqwest::Certificate::from_pem_bundle(&pem)
+                .context("could not parse OTel CA bundle")?;
+            anyhow::ensure!(
+                !certificates.is_empty(),
+                "OTel CA bundle contains no certificates"
+            );
+            client = client.tls_certs_merge(certificates);
         }
+        Ok(Self {
+            client: client.build().context("could not build OTel HTTP client")?,
+            export_url: format!("{}/v1/metrics", endpoint.trim_end_matches('/')),
+        })
     }
 
     /// Send one export request to the collector.
@@ -42,6 +56,29 @@ impl OtelClient {
                 .unwrap_or_else(|_| "<failed to read body>".to_string());
             return Err(Error::Rejected { status, body }.into());
         }
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use uuid::Uuid;
+
+    #[test]
+    fn rejects_missing_or_invalid_ca_bundle() -> anyhow::Result<()> {
+        let _ = rustls::crypto::ring::default_provider().install_default();
+        let path = std::env::temp_dir().join(format!("otel-ca-{}.pem", Uuid::new_v4()));
+        assert!(OtelClient::new("https://localhost", Some(&path)).is_err());
+        for pem in [
+            "",
+            "not a certificate",
+            "-----BEGIN CERTIFICATE-----\ninvalid\n-----END CERTIFICATE-----",
+        ] {
+            std::fs::write(&path, pem)?;
+            assert!(OtelClient::new("https://localhost", Some(&path)).is_err());
+        }
+        std::fs::remove_file(path)?;
         Ok(())
     }
 }

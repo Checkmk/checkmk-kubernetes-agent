@@ -54,9 +54,19 @@ spec:
       priorityClassName: {{ . | quote }}
       {{- end }}
       serviceAccountName: {{ include "rustik.serviceAccountName" (dict "root" . "component" "metrics-cache" "serviceAccount" .Values.metricsCache.serviceAccount) }}
-      {{- with .Values.metricsCache.extraVolumes }}
+      {{- if or .Values.metricsCache.extraVolumes (and .Values.otel.enabled .Values.otel.tls.caSecret) }}
       volumes:
+        {{- if and .Values.otel.enabled .Values.otel.tls.caSecret }}
+        - name: otel-ca
+          secret:
+            secretName: {{ .Values.otel.tls.caSecret | quote }}
+            items:
+              - key: ca.crt
+                path: ca.crt
+        {{- end }}
+        {{- with .Values.metricsCache.extraVolumes }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -135,6 +145,9 @@ spec:
             {{- if .Values.otel.enabled }}
             - --otel-endpoint={{ required "otel.endpoint is required when otel is enabled" .Values.otel.endpoint }}
             - --otel-push-interval={{ .Values.otel.interval }}
+            {{- if .Values.otel.tls.caSecret }}
+            - --otel-ca-cert-file=/etc/rustik/otel-ca/ca.crt
+            {{- end }}
             {{- end }}
             {{- range $k, $v := .Values.emitAll }}
             {{- if $v }}
@@ -226,9 +239,16 @@ spec:
             timeoutSeconds: {{ .Values.metricsCache.readinessProbe.timeoutSeconds }}
             failureThreshold: {{ .Values.metricsCache.readinessProbe.failureThreshold }}
           {{- end }}
-          {{- with .Values.metricsCache.extraVolumeMounts }}
+          {{- if or .Values.metricsCache.extraVolumeMounts (and .Values.otel.enabled .Values.otel.tls.caSecret) }}
           volumeMounts:
+            {{- if and .Values.otel.enabled .Values.otel.tls.caSecret }}
+            - name: otel-ca
+              mountPath: /etc/rustik/otel-ca
+              readOnly: true
+            {{- end }}
+            {{- with .Values.metricsCache.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- end }}
           {{- with .Values.metricsCache.resources }}
           resources:
