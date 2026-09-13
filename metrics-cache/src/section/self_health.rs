@@ -102,14 +102,14 @@ impl<'a> MetricsCacheMetadata<'a> {
 }
 
 #[derive(Debug, Serialize)]
-pub(crate) struct KubeRustikHealthV1<'a> {
+pub(crate) struct KubeAgentHealthV1<'a> {
     metrics_fetchers: BTreeMap<&'a str, NodeMetricsFetcherHealth<'a>>,
     reflector_healths: BTreeMap<&'static str, ReflectorHealth>,
     metrics_cache: MetricsCacheMetadata<'a>,
 }
 
-impl<'a> KubeRustikHealthV1<'a> {
-    pub fn from_self_health(self_health: &'a SelfHealth) -> KubeRustikHealthV1<'a> {
+impl<'a> KubeAgentHealthV1<'a> {
+    pub fn from_self_health(self_health: &'a SelfHealth) -> KubeAgentHealthV1<'a> {
         let reflector_healths = self_health
             .reflector_healths
             .iter()
@@ -121,7 +121,7 @@ impl<'a> KubeRustikHealthV1<'a> {
             .map(|(node, health)| (node.as_str(), NodeMetricsFetcherHealth::from(health)))
             .collect();
 
-        KubeRustikHealthV1 {
+        KubeAgentHealthV1 {
             metrics_fetchers,
             reflector_healths,
             metrics_cache: MetricsCacheMetadata::new(
@@ -132,8 +132,8 @@ impl<'a> KubeRustikHealthV1<'a> {
     }
 }
 
-impl Section for KubeRustikHealthV1<'_> {
-    const NAME: &'static str = "kube_rustik_health_v1";
+impl Section for KubeAgentHealthV1<'_> {
+    const NAME: &'static str = "kube_agent_health_v1";
 }
 
 #[cfg(test)]
@@ -145,7 +145,7 @@ mod tests {
     use crate::test_support::*;
 
     #[test]
-    fn kube_rustik_health_v1() {
+    fn kube_agent_health_v1() {
         let node_metrics_fetchers = BTreeMap::from([
             (
                 s("node01"),
@@ -195,7 +195,7 @@ mod tests {
             reflector_healths,
             metrics_cache_build_info,
         };
-        let section = KubeRustikHealthV1::from_self_health(&self_health);
+        let section = KubeAgentHealthV1::from_self_health(&self_health);
         insta::assert_json_snapshot!(section);
     }
 }

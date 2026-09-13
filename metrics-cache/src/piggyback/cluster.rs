@@ -8,7 +8,7 @@ use crate::piggyback::{AggregationHost, PiggybackHost};
 use crate::section::cluster::{KubeClusterDetailsV1, KubeClusterInfoV1, KubeNodeCountV1};
 use crate::section::node::KubeAllocatablePodsV1;
 use crate::section::resource::{KubeAllocatableCpuResourceV1, KubeAllocatableMemoryResourceV1};
-use crate::section::self_health::KubeRustikHealthV1;
+use crate::section::self_health::KubeAgentHealthV1;
 use crate::section::writeable::{SectionError, WriteableSection};
 use crate::snapshot::Snapshot;
 
@@ -126,7 +126,7 @@ impl PiggybackHost for Cluster<'_> {
         ));
         out.push(WriteableSection::of(
             me,
-            &KubeRustikHealthV1::from_self_health(&self.snapshot.self_health),
+            &KubeAgentHealthV1::from_self_health(&self.snapshot.self_health),
         ));
         if let Some(kube_cluster_details_v1) =
             KubeClusterDetailsV1::new(&self.snapshot.api_health_update)
