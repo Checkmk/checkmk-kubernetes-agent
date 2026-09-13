@@ -8,7 +8,7 @@
 <a href=#8 id=8 data-nosnippet>8</a><span class="kw">use </span><span class="kw">crate</span>::section::cluster::{KubeClusterDetailsV1, KubeClusterInfoV1, KubeNodeCountV1};
 <a href=#9 id=9 data-nosnippet>9</a><span class="kw">use </span><span class="kw">crate</span>::section::node::KubeAllocatablePodsV1;
 <a href=#10 id=10 data-nosnippet>10</a><span class="kw">use </span><span class="kw">crate</span>::section::resource::{KubeAllocatableCpuResourceV1, KubeAllocatableMemoryResourceV1};
-<a href=#11 id=11 data-nosnippet>11</a><span class="kw">use </span><span class="kw">crate</span>::section::self_health::KubeRustikHealthV1;
+<a href=#11 id=11 data-nosnippet>11</a><span class="kw">use </span><span class="kw">crate</span>::section::self_health::KubeAgentHealthV1;
 <a href=#12 id=12 data-nosnippet>12</a><span class="kw">use </span><span class="kw">crate</span>::section::writeable::{SectionError, WriteableSection};
 <a href=#13 id=13 data-nosnippet>13</a><span class="kw">use </span><span class="kw">crate</span>::snapshot::Snapshot;
 <a href=#14 id=14 data-nosnippet>14</a>
@@ -126,7 +126,7 @@
 <a href=#126 id=126 data-nosnippet>126</a>        ));
 <a href=#127 id=127 data-nosnippet>127</a>        out.push(WriteableSection::of(
 <a href=#128 id=128 data-nosnippet>128</a>            me,
-<a href=#129 id=129 data-nosnippet>129</a>            <span class="kw-2">&amp;</span>KubeRustikHealthV1::from_self_health(<span class="kw-2">&amp;</span><span class="self">self</span>.snapshot.self_health),
+<a href=#129 id=129 data-nosnippet>129</a>            <span class="kw-2">&amp;</span>KubeAgentHealthV1::from_self_health(<span class="kw-2">&amp;</span><span class="self">self</span>.snapshot.self_health),
 <a href=#130 id=130 data-nosnippet>130</a>        ));
 <a href=#131 id=131 data-nosnippet>131</a>        <span class="kw">if let </span><span class="prelude-val">Some</span>(kube_cluster_details_v1) =
 <a href=#132 id=132 data-nosnippet>132</a>            KubeClusterDetailsV1::new(<span class="kw-2">&amp;</span><span class="self">self</span>.snapshot.api_health_update)
