@@ -124,7 +124,6 @@ metricsFetcher:
   # see: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   resources:
     limits:
-      cpu: 100m
       memory: 32Mi
     requests:
       cpu: 50m
