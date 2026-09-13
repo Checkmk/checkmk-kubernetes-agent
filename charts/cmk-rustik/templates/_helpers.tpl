@@ -87,3 +87,8 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- define "rustik.serviceAccountName" -}}
 {{- default (printf "%s-%s" (include "rustik.fullname" .root) .component) .serviceAccount.name -}}
 {{- end -}}
+
+{{/* SCCs are cluster-scoped, so include a namespace hash in their names. */}}
+{{- define "rustik.metricsFetcherSCCName" -}}
+{{- printf "%s-%s" (include "rustik.fullname" . | trunc 54 | trimSuffix "-") (.Release.Namespace | sha256sum | trunc 8) -}}
+{{- end -}}

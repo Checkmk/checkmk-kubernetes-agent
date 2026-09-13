@@ -1,4 +1,5 @@
 # Exercise optional fields in linting and the kind install test.
+# Arbitrary UIDs exercise OpenShift image compatibility, not SCC admission.
 # The Autopilot label is render-tested here; kind does not enforce allowlists.
 clusterName: ci
 clusterHostName: ci
@@ -24,6 +25,10 @@ metricsFetcher:
       example.com/identity: chart-test
   securityContext:
     readOnlyRootFilesystem: true
+  podSecurityContext:
+    runAsUser: 1000700000
+    runAsGroup: 0
+    fsGroup: 1000700000
   tolerations:
     - key: dedicated
       operator: Equal
@@ -52,6 +57,10 @@ metricsCache:
       example.com/identity: chart-test
   securityContext:
     readOnlyRootFilesystem: true
+  podSecurityContext:
+    runAsUser: 1000700000
+    runAsGroup: 0
+    fsGroup: 1000700000
   tolerations:
     - key: dedicated
       operator: Equal

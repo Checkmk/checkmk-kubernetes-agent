@@ -34,6 +34,14 @@ gkeAutopilot:
   # Required when enabled.
   matchingAllowlist: ""
 
+openshift:
+  # hostPathSCC creates an OpenShift SCC which permits hostPath volumes and
+  # grants its use only to the metrics-fetcher ServiceAccount. Enable it when
+  # using node interface monitoring or hostPath volumes in
+  # metricsFetcher.extraVolumes.
+  hostPathSCC:
+    enabled: false
+
 # metricsFetcher defines settings that control the daemon running on each
 # node in the cluster, collecting (or "fetching") metrics about the node's
 # kubelet and running the Checkmk agent on the node.
@@ -53,10 +61,9 @@ metricsFetcher:
     annotations: {}
 
   # podSecurityContext applies to all containers in the Pod.
+  # Without an admission override, the official images use UID/GID 10001.
   podSecurityContext:
     runAsNonRoot: true
-    runAsUser: 10001
-    runAsGroup: 10001
     seccompProfile:
       type: RuntimeDefault
   # securityContext applies to the component container.
@@ -150,10 +157,9 @@ metricsCache:
     annotations: {}
 
   # podSecurityContext applies to all containers in the Pod.
+  # Without an admission override, the official images use UID/GID 10001.
   podSecurityContext:
     runAsNonRoot: true
-    runAsUser: 10001
-    runAsGroup: 10001
     seccompProfile:
       type: RuntimeDefault
   # securityContext applies to the component container.

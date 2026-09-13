@@ -11,9 +11,14 @@ spec:
       app: {{ include "rustik.fullname" . }}-metrics-fetcher
   template:
     metadata:
-      {{- with .Values.metricsFetcher.podAnnotations }}
+      {{- if or .Values.metricsFetcher.podAnnotations .Values.openshift.hostPathSCC.enabled }}
       annotations:
+        {{- if .Values.openshift.hostPathSCC.enabled }}
+        openshift.io/required-scc: {{ include "rustik.metricsFetcherSCCName" . }}
+        {{- end }}
+        {{- with (omit .Values.metricsFetcher.podAnnotations "openshift.io/required-scc") }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
       labels:
         {{- include "rustik.labels" . | nindent 8 }}

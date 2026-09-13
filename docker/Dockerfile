@@ -28,14 +28,15 @@ RUN wget https://raw.githubusercontent.com/Checkmk/checkmk/refs/tags/${CMK_AGENT
 COPY --from=builder /src/target/*/release/metrics-fetcher /usr/local/bin/
 COPY docker/check_mk_agent /usr/local/bin/check_mk_agent
 RUN addgroup appgroup -g 10001 && adduser -HD appuser -G appgroup -u 10001
-USER appuser
+# A numeric USER lets Kubernetes verify runAsNonRoot without fixing the Pod UID.
+USER 10001:10001
 ENV PATH="/src/target/debug:/src/target/x86_64-unknown-linux-musl/debug:/src/target/aarch64-unknown-linux-musl/debug:${PATH}"
 ENTRYPOINT ["metrics-fetcher"]
 
 FROM alpine:3.23 AS metrics-cache
 COPY --from=builder /src/target/*/release/metrics-cache /usr/local/bin/
 RUN addgroup appgroup -g 10001 && adduser -HD appuser -G appgroup -u 10001
-USER appuser
+USER 10001:10001
 ENV PATH="/src/target/debug:/src/target/x86_64-unknown-linux-musl/debug:/src/target/aarch64-unknown-linux-musl/debug:${PATH}"
 ENTRYPOINT ["metrics-cache"]
 
@@ -55,12 +56,12 @@ RUN wget https://raw.githubusercontent.com/Checkmk/checkmk/refs/tags/${CMK_AGENT
     apk add coreutils=9.8-r1
 COPY docker/check_mk_agent /usr/local/bin/check_mk_agent
 RUN addgroup appgroup -g 10001 && adduser -HD appuser -G appgroup -u 10001
-USER appuser
+USER 10001:10001
 ENV PATH="/src/target/debug:/src/target/x86_64-unknown-linux-musl/debug:/src/target/aarch64-unknown-linux-musl/debug:${PATH}"
 ENTRYPOINT ["metrics-fetcher"]
 
 FROM alpine:3.23 AS metrics-cache-dev
 RUN addgroup appgroup -g 10001 && adduser -HD appuser -G appgroup -u 10001
-USER appuser
+USER 10001:10001
 ENV PATH="/src/target/debug:/src/target/x86_64-unknown-linux-musl/debug:/src/target/aarch64-unknown-linux-musl/debug:${PATH}"
 ENTRYPOINT ["metrics-cache"]
