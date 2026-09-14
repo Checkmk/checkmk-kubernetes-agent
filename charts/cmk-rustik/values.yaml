@@ -100,6 +100,37 @@ metricsFetcher:
   # metricsCache.kubeletHealthCacheTtl so samples do not expire between polls.
   kubeletHealthPollInterval: 60
 
+  # kubeletTls configures verification of the kubelet certificate. Verification
+  # is disabled by default because Kubernetes distributions do not consistently
+  # make the kubelet CA available to workloads.
+  kubeletTls:
+    # caSource selects the CA bundle used for verification. Supported values
+    # are: disabled, service-account, secret, and config-map. The service-account
+    # source uses /var/run/secrets/kubernetes.io/serviceaccount/ca.crt, which is
+    # not the kubelet CA on every Kubernetes distribution, including OpenShift.
+    caSource: disabled
+
+    # serverIdentity selects how the kubelet certificate identity is verified:
+    # node-ip requires the node IP in the certificate SANs; node-name requires
+    # the Kubernetes node name in the DNS SANs; ca-only verifies the certificate
+    # chain without verifying SANs. ca-only is weaker because any certificate
+    # signed by the selected CA can identify the kubelet.
+    serverIdentity: node-ip
+
+    # existingSecret selects a Secret in the release namespace when caSource is
+    # secret. Restart the metrics-fetcher Pods after updating its CA bundle.
+    existingSecret:
+      name: ""
+      key: ca.crt
+
+    # existingConfigMap selects a ConfigMap in the release namespace when
+    # caSource is config-map. Restart the metrics-fetcher Pods after updating
+    # its CA bundle. OpenShift's kubelet CA is maintained separately in
+    # openshift-config-managed/kubelet-serving-ca and is not synchronized here.
+    existingConfigMap:
+      name: ""
+      key: ca.crt
+
   # systemAgentPollInterval is how often, in seconds, the system agent runs.
   # Must be a whole number greater than zero. Keep this below
   # metricsCache.systemAgentCacheTtl so samples do not expire between polls.

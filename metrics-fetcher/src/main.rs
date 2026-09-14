@@ -15,6 +15,7 @@ use std::sync::Arc;
 use tracing_subscriber::EnvFilter;
 
 use crate::cli_args::CliArgs;
+use crate::kubelet::KubeletClient;
 use crate::kubelet_health::KubeletHealthScraper;
 use crate::kubelet_stats_summary::KubeletStatsSummaryScraper;
 use crate::linux_agent::LinuxAgentScraper;
@@ -47,11 +48,16 @@ async fn main() -> Result<()> {
     }
     .build()?;
 
+    let kubelet_client = KubeletClient::new(&args).await?;
     let args = Arc::new(args);
-    let kubelet_health_scraper =
-        KubeletHealthScraper::new(args.clone(), metrics_cache_client.clone());
+    let kubelet_health_scraper = KubeletHealthScraper::new(
+        args.clone(),
+        metrics_cache_client.clone(),
+        kubelet_client.clone(),
+    );
     let linux_agent_scraper = LinuxAgentScraper::new(args.clone(), metrics_cache_client.clone());
-    let kubelet_stats_summary_scraper = KubeletStatsSummaryScraper::new(args, metrics_cache_client);
+    let kubelet_stats_summary_scraper =
+        KubeletStatsSummaryScraper::new(args, metrics_cache_client, kubelet_client);
     let kubelet_health_scrape = tokio::spawn(kubelet_health_scraper.loop_push_scrape());
     let linux_agent_scrape = tokio::spawn(linux_agent_scraper.loop_push_scrape());
     let kubelet_scrape = tokio::spawn(kubelet_stats_summary_scraper.loop_push_scrape());

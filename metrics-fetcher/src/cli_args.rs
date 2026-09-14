@@ -1,5 +1,15 @@
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use std::time::Duration;
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, ValueEnum)]
+pub enum KubeletServerIdentity {
+    /// Verify the certificate against the node IP address.
+    NodeIp,
+    /// Verify the certificate against the Kubernetes node name.
+    NodeName,
+    /// Verify the certificate chain without verifying its subject alternative names.
+    CaOnly,
+}
 
 #[derive(Debug, Parser)]
 #[command(
@@ -8,6 +18,15 @@ use std::time::Duration;
     about = "Fetch metrics from a Kubernetes node and send them to metrics-cache"
 )]
 pub struct CliArgs {
+    /// CA certificate bundle used to verify the kubelet certificate. When not
+    /// specified, kubelet certificate verification is disabled.
+    #[arg(long)]
+    pub kubelet_ca_cert_file: Option<String>,
+
+    /// Identity used to verify the kubelet certificate.
+    #[arg(long, value_enum, default_value = "node-ip")]
+    pub kubelet_server_identity: KubeletServerIdentity,
+
     /// Kubelet stats poll interval in seconds. Must be greater than zero.
     #[arg(long, default_value = "60", value_parser = parse_positive_seconds)]
     pub kubelet_stats_poll_interval: Duration,
@@ -63,6 +82,10 @@ mod tests {
     fn scraper_timings_have_defaults_and_accept_overrides_in_seconds() {
         let defaults = CliArgs::try_parse_from(["metrics-fetcher"]).expect("valid defaults");
         assert_eq!(
+            defaults.kubelet_server_identity,
+            KubeletServerIdentity::NodeIp
+        );
+        assert_eq!(
             defaults.kubelet_stats_poll_interval,
             Duration::from_secs(60)
         );
@@ -75,12 +98,22 @@ mod tests {
 
         let configured = CliArgs::try_parse_from([
             "metrics-fetcher",
+            "--kubelet-ca-cert-file=/tmp/kubelet-ca.crt",
+            "--kubelet-server-identity=node-name",
             "--kubelet-stats-poll-interval=30",
             "--kubelet-health-poll-interval=45",
             "--system-agent-poll-interval=90",
             "--system-agent-timeout=10",
         ])
         .expect("valid timing overrides");
+        assert_eq!(
+            configured.kubelet_ca_cert_file.as_deref(),
+            Some("/tmp/kubelet-ca.crt")
+        );
+        assert_eq!(
+            configured.kubelet_server_identity,
+            KubeletServerIdentity::NodeName
+        );
         assert_eq!(
             configured.kubelet_stats_poll_interval,
             Duration::from_secs(30)

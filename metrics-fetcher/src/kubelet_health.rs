@@ -6,8 +6,8 @@ use std::time::Duration;
 use tracing::{debug, warn};
 
 use crate::cli_args::CliArgs;
-use crate::error::{Error, Result};
-use crate::kubelet;
+use crate::error::Result;
+use crate::kubelet::KubeletClient;
 use crate::payload::Payload;
 use crate::scraper::Scraper;
 
@@ -19,19 +19,19 @@ pub(crate) enum KubeletHealth {
 }
 
 pub(crate) struct KubeletHealthScraper {
-    scrape_client: Client,
+    kubelet_client: KubeletClient,
     relay_client: Client,
     args: Arc<CliArgs>,
 }
 
 impl KubeletHealthScraper {
-    pub(crate) fn new(args: Arc<CliArgs>, metrics_cache_client: Client) -> KubeletHealthScraper {
-        let scrape_client = Client::builder()
-            .danger_accept_invalid_certs(true)
-            .build()
-            .expect("Could not build scrape client for kubelet health");
+    pub(crate) fn new(
+        args: Arc<CliArgs>,
+        metrics_cache_client: Client,
+        kubelet_client: KubeletClient,
+    ) -> KubeletHealthScraper {
         KubeletHealthScraper {
-            scrape_client,
+            kubelet_client,
             relay_client: metrics_cache_client,
             args,
         }
@@ -52,22 +52,15 @@ impl Scraper for KubeletHealthScraper {
     }
 
     async fn scrape(&self) -> Result<Payload> {
-        let node_ip = std::env::var("NODE_IP").map_err(|e| Error::EnvVar {
-            name: "NODE_IP".to_string(),
-            source: e,
-        })?;
-        let node_name = std::env::var("NODE_NAME").map_err(|e| Error::EnvVar {
-            name: "NODE_NAME".to_string(),
-            source: e,
-        })?;
+        let node_name = self.kubelet_client.node_name().to_string();
         let token =
             tokio::fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")
                 .await?;
 
-        let url = kubelet::url(&node_ip, "/healthz")?;
+        let url = self.kubelet_client.url("/healthz");
         let response = self
-            .scrape_client
-            .get(&url)
+            .kubelet_client
+            .get("/healthz")
             .bearer_auth(token.trim())
             .send()
             .await;

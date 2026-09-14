@@ -1,3 +1,19 @@
+{{- $kubeletTLS := .Values.metricsFetcher.kubeletTls -}}
+{{- $caSource := $kubeletTLS.caSource -}}
+{{- $serverIdentity := $kubeletTLS.serverIdentity -}}
+{{- if not (has $caSource (list "disabled" "service-account" "secret" "config-map")) -}}
+{{- fail "metricsFetcher.kubeletTls.caSource must be one of disabled, service-account, secret, or config-map" -}}
+{{- end -}}
+{{- if not (has $serverIdentity (list "node-ip" "node-name" "ca-only")) -}}
+{{- fail "metricsFetcher.kubeletTls.serverIdentity must be one of node-ip, node-name, or ca-only" -}}
+{{- end -}}
+{{- if and (eq $caSource "secret") (not $kubeletTLS.existingSecret.name) -}}
+{{- fail "metricsFetcher.kubeletTls.existingSecret.name is required when caSource is secret" -}}
+{{- end -}}
+{{- if and (eq $caSource "config-map") (not $kubeletTLS.existingConfigMap.name) -}}
+{{- fail "metricsFetcher.kubeletTls.existingConfigMap.name is required when caSource is config-map" -}}
+{{- end -}}
+{{- $customKubeletCA := or (eq $caSource "secret") (eq $caSource "config-map") -}}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -51,7 +67,7 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if or .Values.metricsFetcher.extraVolumes .Values.intraClusterCommunication.encryption.enabled .Values.metricsFetcher.networkInterfaceMonitoring.enabled }}
+      {{- if or .Values.metricsFetcher.extraVolumes .Values.intraClusterCommunication.encryption.enabled .Values.metricsFetcher.networkInterfaceMonitoring.enabled $customKubeletCA }}
       volumes:
         {{- if .Values.metricsFetcher.networkInterfaceMonitoring.enabled }}
         - name: host-sys
@@ -69,6 +85,21 @@ spec:
             items:
               - key: ca.crt
                 path: intra-cluster-ca.crt
+        {{- end }}
+        {{- if eq $caSource "secret" }}
+        - name: kubelet-ca
+          secret:
+            secretName: {{ $kubeletTLS.existingSecret.name | quote }}
+            items:
+              - key: {{ $kubeletTLS.existingSecret.key | quote }}
+                path: ca.crt
+        {{- else if eq $caSource "config-map" }}
+        - name: kubelet-ca
+          configMap:
+            name: {{ $kubeletTLS.existingConfigMap.name | quote }}
+            items:
+              - key: {{ $kubeletTLS.existingConfigMap.key | quote }}
+                path: ca.crt
         {{- end }}
       {{- end }}
       {{- with .Values.imagePullSecrets }}
@@ -98,6 +129,14 @@ spec:
             {{- if .Values.intraClusterCommunication.encryption.enabled }}
             - --metrics-cache-ca-cert-file=/etc/ssl/certs/intra-cluster-ca.crt
             {{- end }}
+            {{- if ne $caSource "disabled" }}
+            {{- if eq $caSource "service-account" }}
+            - --kubelet-ca-cert-file=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            {{- else }}
+            - --kubelet-ca-cert-file=/etc/rustik/kubelet-ca/ca.crt
+            {{- end }}
+            - --kubelet-server-identity={{ $serverIdentity }}
+            {{- end }}
           env:
             - name: NODE_IP
               valueFrom:
@@ -109,7 +148,7 @@ spec:
                   fieldPath: spec.nodeName
             - name: RUST_LOG
               value: {{ .Values.metricsFetcher.logLevel | default .Values.logLevel }}
-          {{- if or .Values.metricsFetcher.extraVolumeMounts .Values.intraClusterCommunication.encryption.enabled .Values.metricsFetcher.networkInterfaceMonitoring.enabled }}
+          {{- if or .Values.metricsFetcher.extraVolumeMounts .Values.intraClusterCommunication.encryption.enabled .Values.metricsFetcher.networkInterfaceMonitoring.enabled $customKubeletCA }}
           volumeMounts:
             {{- if .Values.metricsFetcher.networkInterfaceMonitoring.enabled }}
             - name: host-sys
@@ -124,6 +163,11 @@ spec:
               readOnly: true
               mountPath: /etc/ssl/certs/intra-cluster-ca.crt
               subPath: intra-cluster-ca.crt
+            {{- end }}
+            {{- if $customKubeletCA }}
+            - name: kubelet-ca
+              readOnly: true
+              mountPath: /etc/rustik/kubelet-ca
             {{- end }}
           {{- end }}
           {{- with .Values.metricsFetcher.resources }}

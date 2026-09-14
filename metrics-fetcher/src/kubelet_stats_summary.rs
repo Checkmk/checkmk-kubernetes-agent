@@ -1,16 +1,16 @@
 use reqwest::Client;
 use std::sync::Arc;
 use std::time::Duration;
-use tracing::{debug, error, trace};
+use tracing::{debug, trace};
 
 use crate::cli_args::CliArgs;
-use crate::error::{Error, Result};
-use crate::kubelet;
+use crate::error::Result;
+use crate::kubelet::KubeletClient;
 use crate::payload::Payload;
 use crate::scraper::Scraper;
 
 pub(crate) struct KubeletStatsSummaryScraper {
-    scrape_client: Client,
+    kubelet_client: KubeletClient,
     relay_client: Client,
     args: Arc<CliArgs>,
 }
@@ -19,13 +19,10 @@ impl KubeletStatsSummaryScraper {
     pub(crate) fn new(
         args: Arc<CliArgs>,
         metrics_cache_client: Client,
+        kubelet_client: KubeletClient,
     ) -> KubeletStatsSummaryScraper {
-        let scrape_client = Client::builder()
-            .danger_accept_invalid_certs(true)
-            .build()
-            .expect("Could not build scrape client for kubelet stats summary");
         KubeletStatsSummaryScraper {
-            scrape_client,
+            kubelet_client,
             relay_client: metrics_cache_client,
             args,
         }
@@ -52,20 +49,10 @@ impl Scraper for KubeletStatsSummaryScraper {
     async fn scrape(&self) -> Result<Payload> {
         trace!("reading kubelet token");
         let token = std::fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
-        let node_ip = match std::env::var("NODE_IP") {
-            Ok(val) => val,
-            Err(err) => {
-                error!("NODE_IP not set, cannot scrape kubelet");
-                return Err(Error::EnvVar {
-                    name: "NODE_IP".to_string(),
-                    source: err,
-                });
-            }
-        };
         debug!("fetching Kubelet /stats/summary");
         let response = self
-            .scrape_client
-            .get(kubelet::url(&node_ip, "/stats/summary")?)
+            .kubelet_client
+            .get("/stats/summary")
             .bearer_auth(token.trim())
             .send()
             .await?;
