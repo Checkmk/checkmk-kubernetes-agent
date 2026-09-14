@@ -337,6 +337,10 @@ mod tests {
                 .or_default()
                 .insert(pvc.metadata.name.clone().unwrap(), pvc.into());
         }
+        let pv = pv("test-local-pv");
+        indexes
+            .pvs
+            .insert(pv.metadata.name.clone().unwrap(), pv.into());
         indexes
     }
 
@@ -378,6 +382,37 @@ mod tests {
         // If everything is in another namespace, do not produce a section
         assert_matches!(
             KubePvcV1::from_claim_names(&indexes, "ANOTHER-namespace", ["pvc-1", "pvc-2"]),
+            None
+        );
+    }
+
+    #[test]
+    fn kube_pvc_pvs_v1() {
+        let mut indexes = pvc_indexes();
+
+        // Both claims resolve to their backing PV, section renders
+        insta::assert_json_snapshot!(KubePvcPvsV1::from_claim_names(
+            &indexes,
+            "really-cool-namespace",
+            ["pvc-1", "pvc-2"]
+        ));
+
+        // No claim resolves to a PVC at all -> no section
+        assert_matches!(
+            KubePvcPvsV1::from_claim_names(&indexes, "really-cool-namespace", ["bad", "worse"]),
+            None
+        );
+
+        // A claim whose PVC exists but isn't bound to a PV is skipped
+        let mut unbound = pvc("pvc-unbound");
+        unbound.spec.as_mut().unwrap().volume_name = None;
+        indexes
+            .pvcs
+            .entry(s("really-cool-namespace"))
+            .or_default()
+            .insert(s("pvc-unbound"), unbound.into());
+        assert_matches!(
+            KubePvcPvsV1::from_claim_names(&indexes, "really-cool-namespace", ["pvc-unbound"]),
             None
         );
     }

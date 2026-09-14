@@ -1,0 +1,18 @@
+---
+source: metrics-cache/src/section/pvc.rs
+expression: "KubePvcPvsV1::from_claim_names(&indexes, \"really-cool-namespace\",\n[\"pvc-1\", \"pvc-2\"])"
+---
+{
+  "volumes": {
+    "test-local-pv": {
+      "name": "test-local-pv",
+      "spec": {
+        "access_modes": [
+          "ReadWriteOnce"
+        ],
+        "storage_class_name": "manual",
+        "volume_mode": "Filesystem"
+      }
+    }
+  }
+}
