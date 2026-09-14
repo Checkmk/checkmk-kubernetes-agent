@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["url"]};
+window.SIDEBAR_ITEMS = {"fn":["ip_base_url","parse_node_ip"],"struct":["KubeletClient"]};

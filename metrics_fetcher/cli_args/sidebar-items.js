@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["parse_positive_seconds"],"struct":["CliArgs"]};
+window.SIDEBAR_ITEMS = {"enum":["KubeletServerIdentity"],"fn":["parse_positive_seconds"],"struct":["CliArgs"]};
