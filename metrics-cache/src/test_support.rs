@@ -6,8 +6,8 @@ use k8s_openapi::api::apps::v1::{
 use k8s_openapi::api::batch::v1::{CronJob, CronJobSpec, Job};
 use k8s_openapi::api::core::v1::{
     Container, ContainerStatus, Namespace, Node, NodeAddress, NodeStatus, NodeSystemInfo,
-    PersistentVolumeClaim, PersistentVolumeClaimSpec, PersistentVolumeClaimStatus, Pod, PodSpec,
-    VolumeResourceRequirements,
+    PersistentVolume, PersistentVolumeClaim, PersistentVolumeClaimSpec,
+    PersistentVolumeClaimStatus, PersistentVolumeSpec, Pod, PodSpec, VolumeResourceRequirements,
 };
 use k8s_openapi::apimachinery::pkg::api::resource::Quantity;
 use k8s_openapi::apimachinery::pkg::apis::meta::v1::{
@@ -380,5 +380,21 @@ pub fn pvc(name: &str) -> PersistentVolumeClaim {
             phase: Some(s("Bound")),
             ..Default::default()
         }),
+    }
+}
+
+pub fn pv(name: &str) -> PersistentVolume {
+    PersistentVolume {
+        metadata: ObjectMeta {
+            name: Some(name.to_string()),
+            ..Default::default()
+        },
+        spec: Some(PersistentVolumeSpec {
+            access_modes: Some(vec![s("ReadWriteOnce")]),
+            storage_class_name: Some(s("manual")),
+            volume_mode: Some(s("Filesystem")),
+            ..Default::default()
+        }),
+        ..Default::default()
     }
 }
