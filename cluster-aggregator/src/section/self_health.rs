@@ -75,6 +75,8 @@ struct ReflectorHealth {
     #[serde(serialize_with = "duration_to_secs")]
     last_error_age_secs: Option<Duration>,
     errors_total: u64,
+    #[serde(serialize_with = "duration_to_secs")]
+    last_event_age_secs: Option<Duration>,
 }
 
 impl From<&crate::snapshot::self_health::ReflectorHealth> for ReflectorHealth {
@@ -86,6 +88,7 @@ impl From<&crate::snapshot::self_health::ReflectorHealth> for ReflectorHealth {
             relist_duration_secs: value.relist_duration,
             last_error_age_secs: value.last_error_age,
             errors_total: value.errors_total,
+            last_event_age_secs: value.last_event_age,
         }
     }
 }
@@ -177,7 +180,13 @@ mod tests {
             ),
         ]);
         let reflector_healths = BTreeMap::from([
-            ("Pod", snapshot::self_health::ReflectorHealth::default()),
+            (
+                "Pod",
+                snapshot::self_health::ReflectorHealth {
+                    last_event_age: Some(Duration::from_millis(1500)),
+                    ..Default::default()
+                },
+            ),
             (
                 "ReplicaSet",
                 snapshot::self_health::ReflectorHealth::default(),

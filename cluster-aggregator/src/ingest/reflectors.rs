@@ -180,8 +180,7 @@ define_reflectors! {
 }
 
 /// The inner-state of a reflector. This gets updated by the reflector's
-/// `inspect` callback as certain events happen (namely `Init`, `InitDone`, and
-/// errors).
+/// `inspect` callback on every watcher event or error.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub(crate) struct ReflectorHealth {
     /// Whether this reflector has completed at least one full initialization
@@ -214,6 +213,10 @@ pub(crate) struct ReflectorHealth {
     pub(crate) last_error_at: Option<Instant>,
     /// How many errors, in total, has the reflector seen in its lifetime?
     pub(crate) errors_total: u64,
+    /// When the reflector last observed a successful watcher event, including
+    /// initialization events. Errors are tracked separately in `last_error_at`.
+    /// A quiet watch can be healthy even when this timestamp is old.
+    pub(crate) last_event_at: Option<Instant>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -226,6 +229,7 @@ impl ReflectorHealthHandle {
                 let now = Instant::now();
                 let mut health = self.0.lock();
                 health.relist_started_at = Some(now);
+                health.last_event_at = Some(now);
             }
             Ok(watcher::Event::InitDone) => {
                 let now = Instant::now();
@@ -235,8 +239,15 @@ impl ReflectorHealthHandle {
                 }
                 health.has_been_initialized = true;
                 health.relist_completed_at = Some(now);
+                health.last_event_at = Some(now);
             }
-            Ok(_) => {}
+            Ok(
+                watcher::Event::InitApply(_) | watcher::Event::Apply(_) | watcher::Event::Delete(_),
+            ) => {
+                let now = Instant::now();
+                let mut health = self.0.lock();
+                health.last_event_at = Some(now);
+            }
             Err(_) => {
                 let now = Instant::now();
                 let mut health = self.0.lock();
@@ -327,6 +338,7 @@ mod tests {
         let handle = outer.0.lock();
         assert!(!handle.has_been_initialized);
         assert!(handle.relist_started_at.is_some());
+        assert_eq!(handle.last_event_at, handle.relist_started_at);
         assert!(handle.relist_completed_at.is_none());
         assert!(handle.relist_duration.is_none());
         assert!(handle.last_error_at.is_none());
@@ -344,6 +356,7 @@ mod tests {
         assert!(handle.relist_started_at.is_none());
         assert!(handle.relist_completed_at.is_some());
         assert!(handle.relist_duration.is_some());
+        assert_eq!(handle.last_event_at, handle.relist_completed_at);
         assert!(handle.last_error_at.is_none());
         assert_eq!(handle.errors_total, 0);
     }
@@ -379,6 +392,7 @@ mod tests {
         outer.observe::<()>(&Err(watcher::Error::NoResourceVersion));
         let first = outer.freeze();
         assert!(first.last_error_at.is_some());
+        assert!(first.last_event_at.is_none());
         assert_eq!(first.errors_total, 1);
 
         let old_error_at = Instant::now() - Duration::from_secs(60);
@@ -390,16 +404,32 @@ mod tests {
         assert_eq!(second.errors_total, 2);
     }
 
-    /// Normal, non-interesting events do not change anything.
+    /// Object events only update the last_event_at timestamp.
     #[test]
-    fn reflector_health_handle_ordinary_event_does_nothing() {
+    fn reflector_health_handle_ordinary_event_updates_timestamp() {
         let outer = ReflectorHealthHandle::default();
-        let before = outer.freeze();
-        outer.observe(&Ok(watcher::Event::Apply(())));
-        outer.observe(&Ok(watcher::Event::Delete(())));
-        outer.observe(&Ok(watcher::Event::InitApply(())));
-        let after = outer.freeze();
-        assert_eq!(before, after);
+        assert!(outer.freeze().last_event_at.is_none());
+
+        for event in [
+            watcher::Event::Apply(()),
+            watcher::Event::Delete(()),
+            watcher::Event::InitApply(()),
+        ] {
+            // Avoid relying on consecutive clock reads having distinct values.
+            let old_event_at = Instant::now() - Duration::from_secs(60);
+            outer.0.lock().last_event_at = Some(old_event_at);
+            let before = outer.freeze();
+            outer.observe(&Ok(event));
+            let after = outer.freeze();
+            assert!(after.last_event_at.expect("event timestamp") > old_event_at);
+            assert_eq!(
+                ReflectorHealth {
+                    last_event_at: before.last_event_at,
+                    ..after
+                },
+                before
+            );
+        }
     }
 
     /// The ReflectorHealth returned by ReflectorHealthHandle::freeze() does not

@@ -66,6 +66,7 @@ pub(crate) struct ReflectorHealth {
     pub(crate) relist_duration: Option<Duration>,
     pub(crate) last_error_age: Option<Duration>,
     pub(crate) errors_total: u64,
+    pub(crate) last_event_age: Option<Duration>,
 }
 
 #[derive(Debug, Default)]
@@ -89,6 +90,9 @@ impl ReflectorHealth {
                 .last_error_at
                 .map(|i| now.saturating_duration_since(i)),
             errors_total: health.errors_total,
+            last_event_age: health
+                .last_event_at
+                .map(|i| now.saturating_duration_since(i)),
         }
     }
 }
@@ -345,6 +349,7 @@ mod tests {
             relist_duration: Some(Duration::from_secs(3)),
             last_error_at: Some(now - Duration::from_secs(30)),
             errors_total: 7,
+            last_event_at: Some(now - Duration::from_secs(1)),
         };
         let converted = ReflectorHealth::from_reflector_health(health, now);
         assert!(converted.has_been_initialized);
@@ -356,6 +361,7 @@ mod tests {
         assert_eq!(converted.relist_duration, Some(Duration::from_secs(3)));
         assert_eq!(converted.last_error_age, Some(Duration::from_secs(30)));
         assert_eq!(converted.errors_total, 7);
+        assert_eq!(converted.last_event_age, Some(Duration::from_secs(1)));
     }
 
     #[test]
@@ -369,6 +375,7 @@ mod tests {
         assert!(converted.relist_duration.is_none());
         assert!(converted.last_error_age.is_none());
         assert_eq!(converted.errors_total, 0);
+        assert!(converted.last_event_age.is_none());
     }
 
     #[test]

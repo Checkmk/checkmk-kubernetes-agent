@@ -52,7 +52,8 @@ expression: section
       "relist_completed_age_secs": null,
       "relist_duration_secs": null,
       "last_error_age_secs": null,
-      "errors_total": 0
+      "errors_total": 0,
+      "last_event_age_secs": null
     },
     "Pod": {
       "has_been_initialized": false,
@@ -60,7 +61,8 @@ expression: section
       "relist_completed_age_secs": null,
       "relist_duration_secs": null,
       "last_error_age_secs": null,
-      "errors_total": 0
+      "errors_total": 0,
+      "last_event_age_secs": 1.5
     },
     "ReplicaSet": {
       "has_been_initialized": false,
@@ -68,7 +70,8 @@ expression: section
       "relist_completed_age_secs": null,
       "relist_duration_secs": null,
       "last_error_age_secs": null,
-      "errors_total": 0
+      "errors_total": 0,
+      "last_event_age_secs": null
     }
   },
   "cluster_aggregator": {

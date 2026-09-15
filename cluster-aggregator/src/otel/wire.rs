@@ -209,7 +209,17 @@ mod tests {
             ),
         ];
 
-        let request: ExportMetricsServiceRequest = entities.into_iter().collect();
+        let mut request: ExportMetricsServiceRequest = entities.into_iter().collect();
+
+        for resource_metrics in &mut request.resource_metrics {
+            for scope_metrics in &mut resource_metrics.scope_metrics {
+                let Some(scope) = scope_metrics.scope.as_mut() else {
+                    panic!("scope metrics must contain an instrumentation scope");
+                };
+                assert_eq!(scope.version, env!("CARGO_PKG_VERSION"));
+                scope.version = "1.1000.0".to_string();
+            }
+        }
 
         insta::assert_debug_snapshot!(request);
     }
