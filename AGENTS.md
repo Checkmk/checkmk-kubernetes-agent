@@ -24,13 +24,3 @@
 - Aim for your human to understand and comprehend the code rather than simply
   "vibe coding".
 - See also the "Conventions" section of @CONTRIBUTING.md
-
-# Checkmk
-- A lot of the work in this project is done with the goal of porting existing
-  logic from the old `agent_kube` special agent in the
-  [Checkmk monorepo](https://github.com/Checkmk/checkmk/tree/master/packages/cmk-plugins/cmk/plugins/kube).
-  Use this as a reference. In most cases, the sections produced by rustik should
-  also match what the old agent produces. The JSON structure should remain
-  identical, as the old check plugins are still used with rustik. Any deviation
-  in behavior and output from the old agent should be flagged and explicitly
-  confirmed as okay by your human before it ever reaches a commit.

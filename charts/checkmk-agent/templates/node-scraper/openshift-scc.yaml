@@ -1,0 +1,72 @@
+{{- if .Values.openshift.hostPathSCC.enabled }}
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  labels:
+    {{- include "checkmk-agent.labels" . | nindent 4 }}
+  name: {{ include "checkmk-agent.nodeScraperSCCName" . }}
+allowPrivilegedContainer: false
+allowPrivilegeEscalation: false
+defaultAllowPrivilegeEscalation: false
+allowHostDirVolumePlugin: true
+allowHostIPC: false
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+readOnlyRootFilesystem: true
+allowedCapabilities: []
+defaultAddCapabilities: []
+requiredDropCapabilities:
+  - ALL
+runAsUser:
+  type: MustRunAsRange
+seLinuxContext:
+  type: MustRunAs
+fsGroup:
+  type: MustRunAs
+supplementalGroups:
+  type: RunAsAny
+seccompProfiles:
+  - runtime/default
+volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - hostPath
+  - persistentVolumeClaim
+  - projected
+  - secret
+users: []
+groups: []
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    {{- include "checkmk-agent.labels" . | nindent 4 }}
+  name: {{ include "checkmk-agent.nodeScraperSCCName" . }}
+rules:
+  - apiGroups:
+      - security.openshift.io
+    resourceNames:
+      - {{ include "checkmk-agent.nodeScraperSCCName" . }}
+    resources:
+      - securitycontextconstraints
+    verbs:
+      - use
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    {{- include "checkmk-agent.labels" . | nindent 4 }}
+  name: {{ include "checkmk-agent.nodeScraperSCCName" . }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "checkmk-agent.nodeScraperSCCName" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "checkmk-agent.serviceAccountName" (dict "root" . "component" "node-scraper" "serviceAccount" .Values.nodeScraper.serviceAccount) }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}

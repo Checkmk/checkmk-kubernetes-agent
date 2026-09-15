@@ -1,0 +1,274 @@
+{{- if and
+  .Values.pull.encryption.enabled
+  (or (eq .Values.clusterAggregator.service.type "NodePort") (eq .Values.clusterAggregator.service.type "LoadBalancer"))
+  (not .Values.pull.encryption.existingSecret)
+}}
+{{- fail "pull.encryption.existingSecret is required when pull encryption is enabled and clusterAggregator.service.type is NodePort or LoadBalancer (the generated certificate only covers cluster-internal DNS names)" }}
+{{- end }}
+{{- if and .Values.namespaceFilter.includePatterns .Values.namespaceFilter.excludePatterns }}
+{{- fail "namespaceFilter.includePatterns and namespaceFilter.excludePatterns are mutually exclusive" }}
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    {{- include "checkmk-agent.labels" . | nindent 4 }}
+  name: {{ include "checkmk-agent.fullname" . }}-cluster-aggregator
+spec:
+  minReadySeconds: {{ .Values.clusterAggregator.minReadySeconds }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "checkmk-agent.fullname" . }}-cluster-aggregator
+  template:
+    metadata:
+      {{- with .Values.clusterAggregator.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "checkmk-agent.labels" . | nindent 8 }}
+        app.kubernetes.io/component: cluster-aggregator
+        app: {{ include "checkmk-agent.fullname" . }}-cluster-aggregator
+        {{- with (omit .Values.clusterAggregator.podLabels "app" "helm.sh/chart" "app.kubernetes.io/name" "app.kubernetes.io/instance" "app.kubernetes.io/version" "app.kubernetes.io/managed-by" "app.kubernetes.io/component") }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.clusterAggregator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.clusterAggregator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.clusterAggregator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.clusterAggregator.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.clusterAggregator.priorityClassName }}
+      priorityClassName: {{ . | quote }}
+      {{- end }}
+      serviceAccountName: {{ include "checkmk-agent.serviceAccountName" (dict "root" . "component" "cluster-aggregator" "serviceAccount" .Values.clusterAggregator.serviceAccount) }}
+      {{- if or .Values.clusterAggregator.extraVolumes (and .Values.otel.enabled .Values.otel.tls.caSecret) }}
+      volumes:
+        {{- if and .Values.otel.enabled .Values.otel.tls.caSecret }}
+        - name: otel-ca
+          secret:
+            secretName: {{ .Values.otel.tls.caSecret | quote }}
+            items:
+              - key: ca.crt
+                path: ca.crt
+        {{- end }}
+        {{- with .Values.clusterAggregator.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.clusterAggregator.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: cluster-aggregator
+          image: {{ include "checkmk-agent.image" (dict "root" . "image" .Values.clusterAggregator.image) | quote }}
+          imagePullPolicy: {{ .Values.clusterAggregator.image.pullPolicy }}
+          {{- with .Values.clusterAggregator.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          args:
+            - --pull-address={{ .Values.clusterAggregator.pullAddress }}
+            - --pull-port={{ .Values.clusterAggregator.pullPort }}
+            {{- if .Values.pull.encryption.enabled }}
+            - --pull-tls-secret={{ include "checkmk-agent.pullTLSSecretName" . }}
+            {{- if not .Values.pull.encryption.existingSecret }}
+            - --pull-tls-secret-generate-if-missing
+            - --pull-tls-secret-generation-validity={{ .Values.pull.encryption.longevity }}
+            - --pull-service-name={{ include "checkmk-agent.fullname" . }}-cluster-aggregator-pull
+            {{- end }}
+            {{- end }}
+            - --ingest-address={{ .Values.clusterAggregator.intraClusterAddress }}
+            - --ingest-port={{ .Values.clusterAggregator.intraClusterPort }}
+            {{- if .Values.intraClusterCommunication.encryption.enabled }}
+            - --ingest-tls-secret={{ include "checkmk-agent.intraClusterTLSSecretName" . }}
+            {{- if not .Values.intraClusterCommunication.encryption.existingSecret }}
+            - --ingest-tls-secret-generate-if-missing
+            - --ingest-tls-secret-generation-validity={{ .Values.intraClusterCommunication.encryption.longevity }}
+            - --ingest-service-name={{ include "checkmk-agent.fullname" . }}-cluster-aggregator-ingest
+            {{- end }}
+            {{- end }}
+            - --reader-allowlist={{ .Release.Namespace }}:{{ include "checkmk-agent.serviceAccountName" (dict "root" . "component" "cluster-aggregator" "serviceAccount" .Values.clusterAggregator.serviceAccount) }}
+            - --writer-allowlist={{ .Release.Namespace }}:{{ include "checkmk-agent.serviceAccountName" (dict "root" . "component" "node-scraper" "serviceAccount" .Values.nodeScraper.serviceAccount) }}
+            - --node-scraper-daemonset-name={{ include "checkmk-agent.fullname" . }}-node-scraper
+            - --cluster-name={{ required "clusterName is required (there is no safe default: it names every generated host)" .Values.clusterName }}
+            - --cluster-host-name={{ required "clusterHostName is required (it must exactly match the Checkmk host representing this cluster)" .Values.clusterHostName }}
+            - --kubelet-stats-cache-ttl={{ .Values.clusterAggregator.kubeletStatsCacheTtl }}
+            - --system-agent-cache-ttl={{ .Values.clusterAggregator.systemAgentCacheTtl }}
+            - --kubelet-health-cache-ttl={{ .Values.clusterAggregator.kubeletHealthCacheTtl }}
+            - --api-health-poll-interval={{ .Values.clusterAggregator.apiHealthPollInterval }}
+            {{- range .Values.clusterAggregation.excludedNodeRolePatterns }}
+            - {{ printf "--excluded-node-role-pattern=%s" . | quote }}
+            {{- end }}
+            {{- range .Values.namespaceFilter.includePatterns }}
+            - {{ printf "--namespace-include-pattern=%s" . | quote }}
+            {{- end }}
+            {{- range .Values.namespaceFilter.excludePatterns }}
+            - {{ printf "--namespace-exclude-pattern=%s" . | quote }}
+            {{- end }}
+            {{- if .Values.podHosts.includeCronJobPods }}
+            - --include-cronjob-pods
+            {{- end }}
+            {{- if .Values.hostLabels.importAllAnnotations }}
+            {{- if .Values.hostLabels.importKeyPattern }}
+            {{ fail "hostLabels.importKeyPattern should not be set while hostLabels.importAllAnnotations is true" }}
+            {{- end }}
+            - --import-all-annotations
+            {{- else if .Values.hostLabels.importKeyPattern }}
+            - --annotation-key-pattern={{ .Values.hostLabels.importKeyPattern }}
+            {{- end }}
+            {{- if .Values.push.enabled }}
+            - --push-receiver={{ required "push.url is required when push mode is enabled" .Values.push.url }}
+            - --push-interval={{ .Values.push.interval }}
+            - --push-certificate-renewal-threshold={{ .Values.push.certificateRenewalThreshold }}
+            {{- if .Values.push.insecureSkipSiteCaVerification }}
+            - --push-registration-insecure-skip-site-ca-verification
+            {{- end }}
+            {{- end }}
+            {{- if .Values.otel.enabled }}
+            - --otel-endpoint={{ required "otel.endpoint is required when otel is enabled" .Values.otel.endpoint }}
+            - --otel-push-interval={{ .Values.otel.interval }}
+            {{- if .Values.otel.tls.caSecret }}
+            - --otel-ca-cert-file=/etc/checkmk-kubernetes-agent/otel-ca/ca.crt
+            {{- end }}
+            {{- end }}
+            {{- range $k, $v := .Values.emitAll }}
+            {{- if $v }}
+            - --all-{{ $k }}
+            {{- end }}
+            {{- end }}
+            {{- /*
+            Gated on pull.enabled too: with pull disabled, no flag and no
+            shared secret env var reach the app, so it rejects all pull
+            requests regardless of the authentication settings below.
+            */}}
+            {{- if and .Values.pull.enabled (not .Values.pull.authentication.enabled) }}
+            - --disable-pull-authentication
+            {{- end }}
+          env:
+            {{- if and .Values.push.enabled .Values.push.registrationSecret }}
+            - name: CMK_PUSH_AGENT_RECEIVER_OTT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.push.registrationSecret | quote }}
+                  key: token
+                  optional: true
+            {{- if not .Values.push.insecureSkipSiteCaVerification }}
+            - name: CMK_PUSH_AGENT_RECEIVER_SITE_CA_PEM
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.push.registrationSecret | quote }}
+                  key: site-ca-pem
+                  optional: true
+            {{- end }}
+            {{- end }}
+            {{- /*
+            If the env var isn't set, the app will block all pull-related
+            requests. Thus we gate the env binding based on pull.enabled
+            which has the effect of gating pull functionality.
+            */}}
+            {{- if and .Values.pull.enabled .Values.pull.authentication.enabled }}
+            - name: CMK_PULL_SHARED_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "checkmk-agent.pullSharedSecretName" . }}
+                  key: {{ include "checkmk-agent.pullSharedSecretKey" . }}
+            {{- end }}
+            {{- /*
+            Deliberately not optional, unlike the push secrets above: a named
+            but missing Secret should stop the Pod with
+            CreateContainerConfigError rather than silently exporting without
+            credentials.
+            */}}
+            {{- if and .Values.otel.enabled .Values.otel.authentication.secretName }}
+            - name: CHECKMK_KUBERNETES_AGENT_OTEL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.otel.authentication.secretName }}
+                  key: username
+            - name: CHECKMK_KUBERNETES_AGENT_OTEL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.otel.authentication.secretName }}
+                  key: password
+            {{- end }}
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: RUST_LOG
+              value: {{ .Values.clusterAggregator.logLevel | default .Values.logLevel }}
+          ports:
+            - containerPort: {{ .Values.clusterAggregator.pullPort }}
+              name: pull
+            - containerPort: {{ .Values.clusterAggregator.intraClusterPort }}
+              name: intra-cluster
+          {{- if .Values.clusterAggregator.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: /livez
+              port: pull
+              scheme: {{ if .Values.pull.encryption.enabled }}HTTPS{{ else }}HTTP{{ end }}
+            initialDelaySeconds: {{ .Values.clusterAggregator.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.clusterAggregator.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.clusterAggregator.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.clusterAggregator.startupProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.clusterAggregator.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: pull
+              scheme: {{ if .Values.pull.encryption.enabled }}HTTPS{{ else }}HTTP{{ end }}
+            initialDelaySeconds: {{ .Values.clusterAggregator.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.clusterAggregator.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.clusterAggregator.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.clusterAggregator.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.clusterAggregator.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: pull
+              scheme: {{ if .Values.pull.encryption.enabled }}HTTPS{{ else }}HTTP{{ end }}
+            initialDelaySeconds: {{ .Values.clusterAggregator.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.clusterAggregator.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.clusterAggregator.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.clusterAggregator.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if or .Values.clusterAggregator.extraVolumeMounts (and .Values.otel.enabled .Values.otel.tls.caSecret) }}
+          volumeMounts:
+            {{- if and .Values.otel.enabled .Values.otel.tls.caSecret }}
+            - name: otel-ca
+              mountPath: /etc/checkmk-kubernetes-agent/otel-ca
+              readOnly: true
+            {{- end }}
+            {{- with .Values.clusterAggregator.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          {{- with .Values.clusterAggregator.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}

@@ -1,0 +1,550 @@
+# nameOverride overrides the chart name used in resource names.
+nameOverride: ""
+# fullnameOverride overrides the release's resource-name prefix.
+fullnameOverride: ""
+
+# clusterName is the name which is part of every piggyback host that gets
+# created in Checkmk as a result of monitoring this cluster. If migrating from
+# the legacy Kubernetes monitoring, it should _exactly_ match what was in your
+# old Kubernetes rule so that your monitored objects retain rules and historical
+# data. This value is required.
+clusterName: ""
+
+# clusterHostName is the name of the Checkmk host which represents the cluster
+# as a whole. It is almost always the host that has the special agent rule
+# attached to it in pull-mode, or that the agent is registered to for push-mode.
+# It must match *exactly* the name of the host in Checkmk. This value is
+# required.
+clusterHostName: ""
+
+# logLevel is the default log level for cluster-aggregator and node-scraper.
+# It can be overridden per component via clusterAggregator.logLevel or
+# nodeScraper.logLevel.
+logLevel: info
+
+# imagePullSecrets references registry credentials in the release namespace.
+imagePullSecrets: []
+
+# gkeAutopilot selects an installed WorkloadAllowlist for node-scraper.
+# Install the Checkmk Kubernetes Agent AllowlistSynchronizer and wait for it to
+# become Ready before deploying.
+gkeAutopilot:
+  enabled: false
+  # matchingAllowlist is the approved Checkmk Kubernetes Agent WorkloadAllowlist
+  # resource name. Required when enabled.
+  matchingAllowlist: ""
+
+openshift:
+  # hostPathSCC creates an OpenShift SCC which permits hostPath volumes and
+  # grants its use only to the node-scraper ServiceAccount. Enable it when
+  # using node interface monitoring or hostPath volumes in
+  # nodeScraper.extraVolumes.
+  hostPathSCC:
+    enabled: false
+
+# clusterAggregator defines settings that control the daemon caching all
+# information about the cluster and serving that information to Checkmk for
+# monitoring.
+clusterAggregator:
+  # serviceAccount configures the component's Kubernetes identity.
+  # Existing accounts still receive the chart's RBAC bindings. Use different
+  # accounts for cache and fetcher to keep their permissions separate.
+  serviceAccount:
+    create: true
+    # name defaults to the component's generated name, even if create is false.
+    name: ""
+    annotations: {}
+
+  # podSecurityContext applies to all containers in the Pod.
+  # Without an admission override, the official images use UID/GID 10001.
+  podSecurityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  # securityContext applies to the component container.
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+  # nodeSelector controls where cluster-aggregator runs. Images require Linux.
+  nodeSelector:
+    kubernetes.io/os: linux
+
+  # tolerations allows scheduling on tainted nodes, e.g. control-plane nodes.
+  tolerations: []
+  # affinity accepts Kubernetes node affinity and Pod (anti-)affinity rules.
+  affinity: {}
+  # topologySpreadConstraints spreads Pods across nodes or zones.
+  topologySpreadConstraints: []
+  # priorityClassName selects an existing PriorityClass.
+  priorityClassName: ""
+  # minReadySeconds is how long a Pod must be ready before it is available.
+  minReadySeconds: 0
+
+  # podAnnotations adds annotations to Pods.
+  podAnnotations: {}
+  # podLabels adds Pod labels. Chart-owned labels take precedence.
+  podLabels: {}
+
+  # image allows you to override the cluster-aggregator container image properties.
+  image:
+    # repository is the registry path and image name, without the tag.
+    repository: ghcr.io/checkmk/checkmk-kubernetes-agent-cluster-aggregator
+    # tag is the image tag or version to use. It defaults to the app version.
+    tag: ""
+    # digest pins an immutable image (e.g. sha256:...). Takes precedence over tag.
+    digest: ""
+    # pullPolicy defines when and if Kubernetes should repull.
+    pullPolicy: IfNotPresent
+
+  # service configures the ports exposed by the Kubernetes Services in front
+  # of cluster-aggregator. The pull Service may be a ClusterIP, NodePort, or
+  # LoadBalancer; the intra-cluster ingestion Service is always a ClusterIP.
+  service:
+    # annotations configures the pull Service, e.g. for cloud load balancers.
+    annotations: {}
+    # ingestAnnotations configures the internal ingestion Service.
+    ingestAnnotations: {}
+    # type controls how the pull Service is exposed.
+    type: ClusterIP
+    # pullPort is the port exposed by the pull Service.
+    pullPort: 10050
+    # intraClusterPort is the port exposed by the ingestion Service.
+    intraClusterPort: 10049
+    # externalTrafficPolicy controls source IP preservation for NodePort and
+    # LoadBalancer Services. Local only forwards to nodes running cluster-aggregator.
+    externalTrafficPolicy: Cluster
+    # loadBalancerClass selects a load balancer implementation, if needed.
+    loadBalancerClass: ""
+    # loadBalancerSourceRanges restricts clients of a LoadBalancer Service.
+    loadBalancerSourceRanges: []
+    # nodePort optionally selects a fixed port; otherwise Kubernetes assigns it.
+    nodePort: null
+
+  # ingress exposes the pull Service using an installed Ingress controller.
+  # TLS here terminates at the controller. With pull.encryption.enabled, also
+  # configure the controller's HTTPS backend and certificate trust explicitly.
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    # hosts lists DNS names and paths. Use / unless your controller rewrites
+    # paths: cluster-aggregator serves its endpoints at their original paths.
+    hosts:
+      - host: checkmk-kubernetes-agent.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    # tls references TLS Secrets in the release namespace.
+    tls: []
+
+  # resources lets you limit and request cluster resources for cluster-aggregator.
+  # see: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  # resources:
+  #   limits:
+  #     cpu: 500m
+  #     memory: 500Mi
+  #   requests:
+  #     cpu: 150m
+  #     memory: 200Mi
+
+  # pullAddress is the address to bind to for pull mode. By default it binds to
+  # all available IPv4 interfaces (0.0.0.0). For an IPv6-only cluster, you might
+  # need to change it, for example to "::".
+  pullAddress: 0.0.0.0
+
+  # pullPort is the container port on which cluster-aggregator serves pull requests.
+  # The pull Service targets this port.
+  pullPort: 10050
+
+  # intraClusterAddress is the address cluster-aggregator binds to, to accept data
+  # from node-scraper. By default it binds to all available IPv4 interfaces
+  # (0.0.0.0). For an IPv6-only cluster, you might need to change it, for
+  # example to "::".
+  intraClusterAddress: 0.0.0.0
+
+  # intraClusterPort is the container port on which cluster-aggregator accepts data
+  # from node-scraper. The ingestion Service targets this port.
+  intraClusterPort: 10049
+
+  # startupProbe allows cluster-aggregator time to initialize and bind its
+  # listeners before Kubernetes begins checking liveness.
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 0
+    periodSeconds: 2
+    timeoutSeconds: 1
+    failureThreshold: 30
+
+  # livenessProbe restarts cluster-aggregator if its HTTP server stops responding.
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 2
+    failureThreshold: 3
+
+  # readinessProbe removes cluster-aggregator from its Services until all Kubernetes
+  # reflectors have completed their initial synchronization.
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 0
+    periodSeconds: 5
+    timeoutSeconds: 2
+    failureThreshold: 3
+
+  # logLevel controls how verbose cluster-aggregator is when writing to stderr.
+  # Inherits top-level logLevel by default.
+  logLevel: ""
+
+  # kubeletStatsCacheTtl is how long (seconds) kubelet stats entries are
+  # persisted in the cache before expiring.
+  kubeletStatsCacheTtl: 120
+
+  # systemAgentCacheTtl is how long (seconds) system agent entries are
+  # persisted in the cache before expiring.
+  systemAgentCacheTtl: 120
+
+  # kubeletHealthCacheTtl is how long (seconds) kubelet health entries are
+  # persisted in the cache before expiring.
+  kubeletHealthCacheTtl: 120
+
+  # extraVolumes adds Kubernetes volume definitions to the Pod.
+  extraVolumes: []
+  # extraVolumeMounts is volume mounts to mount in the cluster-aggregator container.
+  extraVolumeMounts: []
+
+  # apiHealthPollInterval is the number of seconds in between polling the
+  # Kubernetes API server /livez and /readyz health endpoints, used in reporting
+  # overall cluster health. Should be lower than push.interval if push mode is
+  # used and lower than your check interval if pull mode is used.
+  apiHealthPollInterval: 45
+
+# nodeScraper defines settings that control the daemon running on each
+# node in the cluster, collecting (or "scraping") metrics about the node's
+# kubelet and running the Checkmk agent on the node.
+nodeScraper:
+  # networkInterfaceMonitoring mounts the node's /sys at /host/sys, read-only,
+  # for the bundled Checkmk network-interface plugin. Requires hostPath access.
+  networkInterfaceMonitoring:
+    enabled: false
+
+  # serviceAccount configures the component's Kubernetes identity.
+  # Existing accounts still receive the chart's RBAC bindings. Use different
+  # accounts for cache and fetcher to keep their permissions separate.
+  serviceAccount:
+    create: true
+    # name defaults to the component's generated name, even if create is false.
+    name: ""
+    annotations: {}
+
+  # podSecurityContext applies to all containers in the Pod.
+  # Without an admission override, the official images use UID/GID 10001.
+  podSecurityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  # securityContext applies to the component container.
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+  # tolerations allows scheduling on tainted nodes, e.g. control-plane nodes.
+  tolerations: []
+  # affinity accepts Kubernetes node affinity and Pod (anti-)affinity rules.
+  affinity: {}
+  # topologySpreadConstraints spreads Pods across nodes or zones.
+  topologySpreadConstraints: []
+  # priorityClassName selects an existing PriorityClass.
+  priorityClassName: ""
+  # minReadySeconds is how long a Pod must be ready before it is available.
+  minReadySeconds: 0
+
+  # podAnnotations adds annotations to Pods.
+  podAnnotations: {}
+  # podLabels adds Pod labels. Chart-owned labels take precedence.
+  podLabels: {}
+
+  # kubeletStatsPollInterval is how often, in seconds, kubelet stats are polled.
+  # Must be a whole number greater than zero. Keep this below
+  # clusterAggregator.kubeletStatsCacheTtl so samples do not expire between polls.
+  kubeletStatsPollInterval: 60
+
+  # kubeletHealthPollInterval is how often, in seconds, kubelet health is polled.
+  # Must be a whole number greater than zero. Keep this below
+  # clusterAggregator.kubeletHealthCacheTtl so samples do not expire between polls.
+  kubeletHealthPollInterval: 60
+
+  # kubeletTls configures verification of the kubelet certificate. Verification
+  # is disabled by default because Kubernetes distributions do not consistently
+  # make the kubelet CA available to workloads.
+  kubeletTls:
+    # caSource selects the CA bundle used for verification. Supported values
+    # are: disabled, service-account, secret, and config-map. The service-account
+    # source uses /var/run/secrets/kubernetes.io/serviceaccount/ca.crt, which is
+    # not the kubelet CA on every Kubernetes distribution, including OpenShift.
+    caSource: disabled
+
+    # serverIdentity selects how the kubelet certificate identity is verified:
+    # node-ip requires the node IP in the certificate SANs; node-name requires
+    # the Kubernetes node name in the DNS SANs; ca-only verifies the certificate
+    # chain without verifying SANs. ca-only is weaker because any certificate
+    # signed by the selected CA can identify the kubelet.
+    serverIdentity: node-ip
+
+    # existingSecret selects a Secret in the release namespace when caSource is
+    # secret. Restart the node-scraper Pods after updating its CA bundle.
+    existingSecret:
+      name: ""
+      key: ca.crt
+
+    # existingConfigMap selects a ConfigMap in the release namespace when
+    # caSource is config-map. Restart the node-scraper Pods after updating
+    # its CA bundle. OpenShift's kubelet CA is maintained separately in
+    # openshift-config-managed/kubelet-serving-ca and is not synchronized here.
+    existingConfigMap:
+      name: ""
+      key: ca.crt
+
+  # systemAgentPollInterval is how often, in seconds, the system agent runs.
+  # Must be a whole number greater than zero. Keep this below
+  # clusterAggregator.systemAgentCacheTtl so samples do not expire between polls.
+  systemAgentPollInterval: 60
+
+  # systemAgentTimeout is the timeout in seconds for each system-agent run.
+  # Must be a whole number greater than zero.
+  systemAgentTimeout: 15
+
+  # image allows you to override the node-scraper container image properties.
+  image:
+    # repository is the registry path and image name, without the tag.
+    repository: ghcr.io/checkmk/checkmk-kubernetes-agent-node-scraper
+    # tag is the image tag or version to use. It defaults to the app version.
+    tag: ""
+    # digest pins an immutable image (e.g. sha256:...). Takes precedence over tag.
+    digest: ""
+    # pullPolicy defines when and if Kubernetes should repull.
+    pullPolicy: IfNotPresent
+
+  # resources lets you limit and request cluster resources for node-scraper.
+  # see: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  # resources:
+  #   limits:
+  #     memory: 32Mi
+  #   requests:
+  #     cpu: 50m
+  #     memory: 16Mi
+
+  # logLevel controls how verbose node-scraper is when writing to stderr.
+  # Inherits top-level logLevel by default.
+  logLevel: ""
+
+  # nodeSelector controls which nodes run node-scraper. The default avoids
+  # scheduling the Linux-only image and Checkmk agent on Windows nodes.
+  nodeSelector:
+    kubernetes.io/os: linux
+
+  # extraVolumes adds Kubernetes volume definitions to the Pod.
+  extraVolumes: []
+  # extraVolumeMounts is volume mounts to mount in the node-scraper container.
+  extraVolumeMounts: []
+
+# push allows you to enable, disable, and configure push mode; pushing data
+# *into* Checkmk from the cluster.
+push:
+  # enabled controls whether push mode is activated or not.
+  enabled: false
+  # registrationSecret is the name of an existing Kubernetes Secret used to
+  # register with Checkmk's push-agent receiver. The Secret must be in the
+  # release namespace and contain the keys "token" (the one-time registration
+  # token issued by Checkmk) and "site-ca-pem" (the PEM-encoded Checkmk site CA
+  # certificate). The site CA can be downloaded from Setup > Certificate
+  # overview; it has the description "Signing the site certificate" and a path
+  # ending in "/ssl/ca.pem". The Secret is only needed for initial registration
+  # and may be removed afterward.
+  registrationSecret: ""
+  # url is the url of the push-agent receiver for your site. It *includes* the
+  # site name. Example: https://example.com:8000/production
+  url: ""
+  # insecureSkipSiteCaVerification *should NOT* ever be set to `true` in
+  # production. It provides an escape hatch primarily for development of the
+  # agent itself or for environments that do not care about potential
+  # man-in-the-middle attacks (which could expose your one-time registration
+  # token to an attacker who could then register as your cluster). You have
+  # been warned. When set to true, will trust whatever push-agent receiver
+  # answers at the configured URL, without verifying its identity.
+  insecureSkipSiteCaVerification: false
+  # interval is how often, in seconds, sections are generated and pushed to
+  # the Checkmk site. Must be greater than zero.
+  interval: 60
+  # certificateRenewalThreshold is how many days before expiration the client
+  # certificate should be renewed.
+  certificateRenewalThreshold: 45
+
+# pull allows you to configure pull mode, so that Checkmk's special agent can
+# query the agent directly.
+pull:
+  # enabled controls whether pull mode is activated or not. If false, all
+  # requests to the pull endpoint(s) will return HTTP 401.
+  enabled: false
+  # authentication controls the shared secret used by the Checkmk special agent.
+  authentication:
+    # enabled allows you to control if authentication is required for accessing
+    # the pull-mode endpoints at all. For production, you should generally keep
+    # this enabled as otherwise cluster-monitoring could publicly expose
+    # information about your environment.
+    enabled: true
+
+    # existingSecret references a Kubernetes secret (and the key within it)
+    # holding the shared secret. The secret must already exist; the chart does
+    # not create it for you in this case.
+    existingSecret:
+      name: ""
+      key: secret
+
+    # insecureRawSecretString *should NOT* be used in production.
+    # It allows for setting the shared secret directly from the Helm variables,
+    # which can be useful for development or debugging, but ends up storing the
+    # shared secret in plain text (obtainable easily via `helm get values` for
+    # example). When this is set, a secret containing the value is created for
+    # you.
+    # Set exactly one of existingSecret.name or insecureRawSecretString;
+    # setting both (or neither) while authentication is enabled is an error.
+    # insecureRawSecretString: "very_s3cret!!!"
+
+  # encryption configures TLS for the pull listener. If existingSecret is
+  # empty, cluster-aggregator creates and reuses a Secret containing a CA and server
+  # certificate. If existingSecret is set, it must already exist and contain
+  # tls.crt and tls.key; cluster-aggregator will not generate or replace it.
+  # When the pull Service is a NodePort or LoadBalancer, existingSecret is
+  # required because the generated certificate only contains cluster-internal
+  # DNS names.
+  encryption:
+    enabled: false
+    existingSecret: ""
+    # longevity is the validity of an automatically generated CA and server
+    # certificate, in days. It is ignored when existingSecret is set.
+    longevity: 3650
+
+# otel allows you to enable, disable, and configure the OpenTelemetry export.
+# Unlike push mode, this does not send Checkmk sections: it exports pod- and
+# container-level metrics derived from the kubelet data, using OTLP over HTTP.
+otel:
+  # enabled controls whether the OpenTelemetry export is activated or not.
+  enabled: false
+  # endpoint is the base URL of an OpenTelemetry collector's OTLP/HTTP receiver.
+  # Do *not* include the signal path: "/v1/metrics" is appended for you.
+  # Required when otel.enabled is true.
+  endpoint: ""
+  tls:
+    # Optional existing Secret in the release namespace containing a PEM CA
+    # bundle in ca.crt, used in addition to default trusted CAs to verify the
+    # collector's certificate. Restart cluster-aggregator after changing the bundle.
+    caSecret: ""
+  # interval is how often, in seconds, metrics are collected and exported to
+  # the collector. Must be greater than zero.
+  interval: 60
+  # authentication configures basic-auth against the collector. No credentials
+  # are sent while secretName is empty.
+  authentication:
+    # secretName references a Kubernetes Secret holding a "username" and a
+    # "password" field. The Secret must already exist; the chart does not
+    # create it for you. A username with an empty password is accepted, a
+    # password without a username is not. Create one with:
+    #   kubectl create secret generic my-otel-auth \
+    #     --from-literal=username=bob --from-literal=password=McBobberson
+    secretName: ""
+
+# hostLabels defines how annotations get imported as labels in Checkmk. By
+# default annotations do not become host labels.
+hostLabels:
+  # importAllAnnotations imports every annotation (whose value is a valid
+  # label value) as a host label. Must not be combined with importKeyPattern.
+  importAllAnnotations: false
+  # importKeyPattern imports only annotations whose key matches this regex.
+  # Empty means no annotations are imported.
+  importKeyPattern: ""
+
+# clusterAggregation configures which Nodes contribute to resource and
+# performance sections on the Cluster host. Patterns use regular-expression
+# infix matching against Node roles. An empty list includes every Node.
+clusterAggregation:
+  # Control-plane and infrastructure Nodes do not normally contribute to the
+  # workload capacity of a cluster, so they are excluded by default.
+  excludedNodeRolePatterns:
+    - control-plane
+    - infra
+
+# namespaceFilter limits which namespaced resources become piggyback hosts.
+# Patterns use regular-expression infix matching. Include and exclude patterns
+# are mutually exclusive. Cluster and Node hosts and their rollups are not
+# affected by this setting.
+namespaceFilter:
+  # includePatterns emits resources only from matching namespaces. An empty
+  # list includes every namespace.
+  includePatterns: []
+  # excludePatterns suppresses resources from matching namespaces.
+  excludePatterns: []
+
+# podHosts configures which Pods may become standalone piggyback hosts.
+podHosts:
+  # includeCronJobPods permits Pods owned by CronJobs to become hosts. It has
+  # no effect unless the Pod is otherwise selected by emitAll.pods or its
+  # checkmk.com/promote-to-host annotation.
+  includeCronJobPods: false
+
+# emitAll allows you to set which kinds have ALL of their resources turned into
+# piggyback hosts in Checkmk. Resources not enabled here can be opted in via an
+# annotation (checkmk.com/promote-to-host: "true"). By default, pods are not
+# emitted by default, everything else is. PVCs are not piggyback hosts; their
+# setting controls PVC-related sections on Pods and workload hosts.
+emitAll:
+  pods: false
+  namespaces: true
+  nodes: true
+  deployments: true
+  daemonsets: true
+  statefulsets: true
+  cronjobs: true
+  pvcs: false
+
+# intraClusterCommunication configures communication between node-scraper
+# and cluster-aggregator. Encryption is enabled by default.
+intraClusterCommunication:
+  # encryption configures TLS for the ingestion listener. If existingSecret is
+  # empty, cluster-aggregator creates and reuses a Secret containing a CA and server
+  # certificate. If existingSecret is set, it must already exist and contain
+  # tls.crt, tls.key, and ca.crt; cluster-aggregator will not generate or replace it.
+  encryption:
+    enabled: true
+    existingSecret: ""
+    # longevity is the validity of an automatically generated CA and server
+    # certificate, in days. It is ignored when existingSecret is set.
+    longevity: 3650
+
+# networkPolicy requires a CNI plugin that enforces Kubernetes NetworkPolicies.
+networkPolicy:
+  # enabled restricts cache ingress to fetcher ingestion and pullFrom peers.
+  # Fetcher has no listening ports and receives no incoming connections.
+  enabled: false
+  # pullFrom is a list of NetworkPolicyPeer objects allowed to reach the pull
+  # listener, e.g. ipBlock CIDRs or namespaceSelector/podSelector pairs for an
+  # Ingress controller. Empty denies pull traffic when policies are enabled.
+  pullFrom: []
+  egress:
+    # enabled also restricts outgoing traffic. Fetcher -> cache is automatic;
+    # configure DNS, Kubernetes API, kubelet, push and OTel destinations below
+    # before enabling this.
+    enabled: false
+    # commonRules contains native NetworkPolicyEgressRule objects for both Pods.
+    commonRules: []
+    # clusterAggregatorRules adds cache egress, e.g. push receiver and OTLP collector.
+    clusterAggregatorRules: []
+    # nodeScraperRules adds fetcher egress, e.g. node CIDRs on kubelet TCP 10250.
+    nodeScraperRules: []

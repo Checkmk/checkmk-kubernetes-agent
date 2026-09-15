@@ -12,7 +12,7 @@ jobs:
   image:
     strategy:
       matrix:
-        component: [metrics-cache, metrics-fetcher]
+        component: [cluster-aggregator, node-scraper]
     uses: docker/github-builder/.github/workflows/build.yml@v1.12.0
     permissions:
       contents: read
@@ -30,7 +30,7 @@ jobs:
       set-meta-labels: true
       set-meta-annotations: true
       build-args: |
-        RUSTIK_GIT_SHA=${{ github.sha }}
+        CHECKMK_KUBERNETES_AGENT_GIT_SHA=${{ github.sha }}
       meta-images: ghcr.io/${{ github.repository }}-${{ matrix.component }}
       # Releases get only the full x.y.z version, without moving version aliases.
       meta-flavor: latest=false

@@ -1,0 +1,603 @@
+use clap::Parser;
+use clap::builder::NonEmptyStringValueParser;
+use regex::Regex;
+use std::path::PathBuf;
+use std::time::Duration;
+use thiserror::Error;
+
+use crate::otel::client::BasicAuth;
+
+pub struct TlsConfig {
+    pub secret_name: Option<String>,
+    pub generate_if_missing: bool,
+    pub namespace: Option<String>,
+    pub service_name: Option<String>,
+    pub longevity: Duration,
+}
+
+#[derive(Debug, Parser)]
+#[command(
+    version,
+    name = "cluster-aggregator",
+    about = "The Checkmk Kubernetes Agent cluster aggregator"
+)]
+pub struct CliArgs {
+    /// The namespace cluster-aggregator is running in
+    #[arg(long, env = "NAMESPACE")]
+    pub namespace: Option<String>,
+
+    /// Name of the node-scraper DaemonSet whose scheduled Pods are expected
+    /// to report metrics
+    #[arg(long, requires = "namespace")]
+    pub node_scraper_daemonset_name: Option<String>,
+
+    /// IP address to bind to for intra-cluster ingest
+    #[arg(long, default_value = "127.0.0.1")]
+    pub ingest_address: String,
+
+    /// Port to bind to for intra-cluster ingest
+    #[arg(long, default_value_t = 10049)]
+    pub ingest_port: u16,
+
+    /// The service name for intra-cluster ingest
+    #[arg(long)]
+    pub ingest_service_name: Option<String>,
+
+    /// Secret containing the TLS certificate and key for intra-cluster ingest
+    #[arg(long)]
+    pub ingest_tls_secret: Option<String>,
+
+    /// Generate the intra-cluster ingest TLS CA and certificate if missing and
+    /// store it as a Kubernetes Secret
+    #[arg(
+        long,
+        requires_all = ["namespace", "ingest_service_name", "ingest_tls_secret"],
+        default_value_t = false
+    )]
+    pub ingest_tls_secret_generate_if_missing: bool,
+
+    /// When generating the intra-cluster ingest TLS CA and certificate,
+    /// specifies how long they should be valid for in days
+    #[arg(
+        long,
+        requires = "ingest_tls_secret_generate_if_missing",
+        default_value = "3650",
+        value_parser = parse_duration_days,
+    )]
+    pub ingest_tls_secret_generation_validity: Duration,
+
+    /// Service accounts that have access to query data from the metrics cache
+    /// API GET endpoints. Comma-separated, in the form NAMESPACE:SERVICEACCOUNT
+    #[arg(
+        long,
+        alias = "reader-whitelist",
+        value_delimiter = ',',
+        default_value = "checkmk-monitoring:checkmk"
+    )]
+    pub reader_allowlist: Vec<String>,
+
+    /// Service accounts that have access to query data from the metrics cache
+    /// API POST endpoints. Comma-separated, in the form
+    /// NAMESPACE:SERVICEACCOUNT
+    #[arg(
+        long,
+        alias = "writer-whitelist",
+        value_delimiter = ',',
+        default_value = "checkmk-monitoring:node-collector" // Backwards compat
+    )]
+    pub writer_allowlist: Vec<String>,
+
+    /// How long (seconds) kubelet stats entries are persisted in the cache
+    #[arg(
+        long,
+        value_parser = parse_duration_secs,
+        default_value = "120"
+    )]
+    pub kubelet_stats_cache_ttl: Duration,
+
+    /// How long (seconds) system agent entries are persisted in the cache
+    #[arg(
+        long,
+        value_parser = parse_duration_secs,
+        default_value = "120"
+    )]
+    pub system_agent_cache_ttl: Duration,
+
+    /// How long (seconds) kubelet health entries are persisted in the cache
+    #[arg(
+        long,
+        value_parser = parse_duration_secs,
+        default_value = "120"
+    )]
+    pub kubelet_health_cache_ttl: Duration,
+
+    /// How verbose to log
+    #[arg(
+        short = 'l',
+        long,
+        value_parser = ["trace", "debug", "info", "warn", "error", "off"],
+        default_value = "info",
+    )]
+    pub log_level: String,
+
+    /// IP address to bind to for pull mode
+    #[arg(long, default_value = "127.0.0.1")]
+    pub pull_address: String,
+
+    /// Port to bind to for pull mode
+    #[arg(long, default_value_t = 10050)]
+    pub pull_port: u16,
+
+    /// The service name for pull mode
+    #[arg(long)]
+    pub pull_service_name: Option<String>,
+
+    /// Secret containing the TLS certificate and key for pull mode
+    #[arg(long)]
+    pub pull_tls_secret: Option<String>,
+
+    /// Generate the pull mode TLS CA and certificate if missing and store it as
+    /// a Kubernetes Secret
+    #[arg(
+        long,
+        requires_all = ["namespace", "pull_service_name", "pull_tls_secret"],
+        default_value_t = false
+    )]
+    pub pull_tls_secret_generate_if_missing: bool,
+
+    /// When generating the pull-mode  TLS CA and certificate, specifies how
+    /// long they should be valid for in days
+    #[arg(
+        long,
+        requires = "pull_tls_secret_generate_if_missing",
+        default_value = "3650",
+        value_parser = parse_duration_days,
+    )]
+    pub pull_tls_secret_generation_validity: Duration,
+
+    /// Maximum number of retries when contacting the Kubernetes API for
+    /// authentication
+    #[arg(short = 'r', long, default_value_t = 3)]
+    pub max_retries: u8,
+
+    /// Time in seconds to wait for a TCP connection to the Kubernetes API
+    /// during authentication
+    #[arg(
+        short = 'C',
+        long,
+        value_parser = parse_duration_secs,
+        default_value = "10",
+    )]
+    pub connect_timeout: Duration,
+
+    /// Time in seconds to wait for a response from the Kubernetes API during
+    /// authentication
+    #[arg(
+        short = 'R',
+        long,
+        value_parser = parse_duration_secs,
+        default_value = "12",
+    )]
+    pub read_timeout: Duration,
+
+    /// The name of the cluster, included in each piggyback hostname
+    #[arg(long)]
+    pub cluster_name: String,
+
+    /// The name of the source host in Checkmk (should be an exact match)
+    #[arg(long)]
+    pub cluster_host_name: String,
+
+    /// Import all annotations as host labels
+    #[arg(long, default_value_t = false)]
+    pub import_all_annotations: bool,
+
+    #[arg(long, conflicts_with = "import_all_annotations")]
+    pub annotation_key_pattern: Option<Regex>,
+
+    /// Make the pull-based endpoints publicly accessible
+    #[arg(long, default_value_t = false)]
+    pub disable_pull_authentication: bool,
+
+    /// For pull mode, the shared secret that is also stored in Checkmk's
+    /// password store. If not set, pull mode is disabled and requests will give
+    /// a 401. To disable auth, use --disable-pull-authentication
+    #[arg(long, env = "CMK_PULL_SHARED_SECRET", hide_env_values = true)]
+    pub pull_shared_secret: Option<String>,
+
+    /// Push interval in seconds for push mode. Ignored if push mode is not enabled.
+    #[arg(
+        long,
+        value_parser = parse_interval,
+        default_value = "60"
+    )]
+    pub push_interval: Duration,
+
+    /// Number of days before client certificate expiration to attempt renewal
+    #[arg(long, value_parser = parse_duration_days, default_value = "45")]
+    pub push_certificate_renewal_threshold: Duration,
+
+    /// Enable push mode and send sections to the specified server (including
+    /// port)
+    #[arg(long)]
+    pub push_receiver: Option<String>,
+
+    /// Token to register with the Checkmk push-agent receiver for push mode
+    #[arg(long, env = "CMK_PUSH_AGENT_RECEIVER_OTT", hide_env_values = true)]
+    pub push_registration_ott: Option<String>,
+
+    /// CA certificate (PEM) of the Checkmk site, used to verify we are about to
+    /// register with the correct push-agent receiver
+    #[arg(
+        long,
+        env = "CMK_PUSH_AGENT_RECEIVER_SITE_CA_PEM",
+        hide_env_values = true
+    )]
+    pub push_registration_pem: Option<String>,
+
+    /// Avoid verifying the identity of the configured push-agent receiver
+    /// during initial registration. Do NOT use in production.
+    #[arg(long, default_value_t = false)]
+    pub push_registration_insecure_skip_site_ca_verification: bool,
+
+    /// Excluded node role (infix) pattern for cluster-level aggregations.
+    /// May be specified multiple times
+    #[arg(long = "excluded-node-role-pattern")]
+    pub excluded_node_role_patterns: Vec<Regex>,
+
+    /// Only emit piggyback hosts belonging to namespaces matching at least one
+    /// of these regex patterns. May be specified multiple times
+    #[arg(
+        long = "namespace-include-pattern",
+        conflicts_with = "namespace_exclude_patterns"
+    )]
+    pub namespace_include_patterns: Vec<Regex>,
+
+    /// Do not emit piggyback hosts belonging to namespaces matching any of
+    /// these regex patterns. May be specified multiple times
+    #[arg(
+        long = "namespace-exclude-pattern",
+        conflicts_with = "namespace_include_patterns"
+    )]
+    pub namespace_exclude_patterns: Vec<Regex>,
+
+    /// Enable sending OTel metrics to the endpoint given
+    #[arg(long)]
+    pub otel_endpoint: Option<String>,
+
+    /// PEM CA bundle used to verify the OTel collector, in addition to default roots
+    #[arg(long, requires = "otel_endpoint")]
+    pub otel_ca_cert_file: Option<PathBuf>,
+
+    /// Push interval in seconds for sending otel metrics.
+    #[arg(
+        long,
+        value_parser = parse_interval,
+        default_value = "60"
+    )]
+    pub otel_push_interval: Duration,
+
+    /// Username for basic-auth against the OTel collector. A username
+    /// without a password is allowed
+    #[arg(
+        long,
+        env = "CHECKMK_KUBERNETES_AGENT_OTEL_USERNAME",
+        value_parser = NonEmptyStringValueParser::new(),
+    )]
+    pub otel_username: Option<String>,
+
+    /// Password for basic-auth against the OTel collector. Requires a
+    /// username
+    #[arg(
+        long,
+        env = "CHECKMK_KUBERNETES_AGENT_OTEL_PASSWORD",
+        hide_env_values = true,
+        requires = "otel_username"
+    )]
+    pub otel_password: Option<String>,
+
+    /// How often (seconds) to query the Kubernetes API health endpoints /readyz
+    /// and /livez
+    #[arg(long, value_parser = parse_interval, default_value = "45")]
+    pub api_health_poll_interval: Duration,
+
+    /// Emit all Pod resources rather than only annotated ones
+    #[arg(long)]
+    pub all_pods: bool,
+
+    /// Allow Pods owned by CronJobs to become standalone piggyback hosts
+    #[arg(long)]
+    pub include_cronjob_pods: bool,
+
+    /// Emit all Namespace resources rather than only annotated ones
+    #[arg(long)]
+    pub all_namespaces: bool,
+
+    /// Emit all Node resources rather than only annotated ones
+    #[arg(long)]
+    pub all_nodes: bool,
+
+    /// Emit all Deployment resources rather than only annotated ones
+    #[arg(long)]
+    pub all_deployments: bool,
+
+    /// Emit all DaemonSet resources rather than only annotated ones
+    #[arg(long)]
+    pub all_daemonsets: bool,
+
+    /// Emit all StatefulSet resources rather than only annotated ones
+    #[arg(long)]
+    pub all_statefulsets: bool,
+
+    /// Emit all CronJob resources rather than only annotated ones
+    #[arg(long)]
+    pub all_cronjobs: bool,
+
+    /// Emit PVC sections on Pod and workload resources
+    #[arg(long)]
+    pub all_pvcs: bool,
+}
+
+impl CliArgs {
+    pub fn ingest_tls_config(&self) -> TlsConfig {
+        TlsConfig {
+            secret_name: self.ingest_tls_secret.clone(),
+            generate_if_missing: self.ingest_tls_secret_generate_if_missing,
+            namespace: self.namespace.clone(),
+            service_name: self.ingest_service_name.clone(),
+            longevity: self.ingest_tls_secret_generation_validity,
+        }
+    }
+
+    pub fn pull_tls_config(&self) -> TlsConfig {
+        TlsConfig {
+            secret_name: self.pull_tls_secret.clone(),
+            generate_if_missing: self.pull_tls_secret_generate_if_missing,
+            namespace: self.namespace.clone(),
+            service_name: self.pull_service_name.clone(),
+            longevity: self.pull_tls_secret_generation_validity,
+        }
+    }
+
+    pub fn otel_basic_auth(&self) -> Option<BasicAuth> {
+        self.otel_username.clone().map(|username| BasicAuth {
+            username,
+            password: self.otel_password.clone(),
+        })
+    }
+}
+
+/// Convert a numeric argument given by the user as seconds into a Duration.
+fn parse_duration_secs(arg: &str) -> Result<Duration, std::num::ParseIntError> {
+    let seconds = arg.parse()?;
+    Ok(Duration::from_secs(seconds))
+}
+
+/// Convert a numeric argument given by the user as days into a Duration.
+fn parse_duration_days(arg: &str) -> Result<Duration, std::num::ParseIntError> {
+    let days: u64 = arg.parse()?;
+    Ok(Duration::from_secs(60 * 60 * 24 * days))
+}
+
+#[derive(Error, Debug)]
+enum IntervalError {
+    #[error("must be a whole number of seconds")]
+    NotANumber(#[from] std::num::ParseIntError),
+    #[error("must be greater than zero")]
+    Zero,
+}
+
+fn parse_interval(arg: &str) -> Result<Duration, IntervalError> {
+    let interval = parse_duration_secs(arg)?;
+    // if 0, tokio panics
+    match interval.is_zero() {
+        true => Err(IntervalError::Zero),
+        false => Ok(interval),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::error::ErrorKind;
+
+    fn parse(extra_args: &[&str]) -> Result<CliArgs, clap::Error> {
+        let mut args = vec![
+            "cluster-aggregator",
+            "--cluster-name",
+            "cluster",
+            "--cluster-host-name",
+            "cluster-host",
+        ];
+        args.extend_from_slice(extra_args);
+        CliArgs::try_parse_from(args)
+    }
+
+    #[test]
+    fn existing_tls_secrets_do_not_require_generation_arguments() {
+        for secret_arg in ["--pull-tls-secret", "--ingest-tls-secret"] {
+            assert!(parse(&[secret_arg, "existing-tls"]).is_ok());
+        }
+    }
+
+    #[test]
+    fn generated_tls_secret_configuration_parses() {
+        for (secret_arg, generate_arg, service_arg) in [
+            (
+                "--pull-tls-secret",
+                "--pull-tls-secret-generate-if-missing",
+                "--pull-service-name",
+            ),
+            (
+                "--ingest-tls-secret",
+                "--ingest-tls-secret-generate-if-missing",
+                "--ingest-service-name",
+            ),
+        ] {
+            assert!(
+                parse(&[
+                    "--namespace",
+                    "monitoring",
+                    secret_arg,
+                    "generated-tls",
+                    service_arg,
+                    "cluster-aggregator",
+                    generate_arg,
+                ])
+                .is_ok()
+            );
+        }
+    }
+
+    #[test]
+    fn generated_tls_secret_requires_secret_and_service_names() {
+        for args in [
+            vec![
+                "--namespace",
+                "monitoring",
+                "--pull-service-name",
+                "cluster-aggregator",
+                "--pull-tls-secret-generate-if-missing",
+            ],
+            vec![
+                "--namespace",
+                "monitoring",
+                "--pull-tls-secret",
+                "generated-tls",
+                "--pull-tls-secret-generate-if-missing",
+            ],
+            vec![
+                "--namespace",
+                "monitoring",
+                "--ingest-service-name",
+                "cluster-aggregator",
+                "--ingest-tls-secret-generate-if-missing",
+            ],
+            vec![
+                "--namespace",
+                "monitoring",
+                "--ingest-tls-secret",
+                "generated-tls",
+                "--ingest-tls-secret-generate-if-missing",
+            ],
+        ] {
+            assert_eq!(
+                parse(&args)
+                    .expect_err("incomplete TLS generation configuration should fail")
+                    .kind(),
+                ErrorKind::MissingRequiredArgument
+            );
+        }
+    }
+
+    #[test]
+    fn cache_ttls_have_expected_defaults() {
+        let args = parse(&[]).expect("minimal args should parse");
+        assert_eq!(args.kubelet_stats_cache_ttl, Duration::from_secs(120));
+        assert_eq!(args.system_agent_cache_ttl, Duration::from_secs(120));
+        assert_eq!(args.kubelet_health_cache_ttl, Duration::from_secs(120));
+    }
+
+    #[test]
+    fn filter_patterns_are_repeatable_and_not_comma_delimited() {
+        let args = parse(&[
+            "--excluded-node-role-pattern",
+            "worker-[0-9]{1,3}",
+            "--excluded-node-role-pattern",
+            "infra",
+            "--namespace-include-pattern",
+            "production",
+        ])
+        .expect("valid filter patterns should parse");
+
+        assert_eq!(
+            args.excluded_node_role_patterns
+                .iter()
+                .map(Regex::as_str)
+                .collect::<Vec<_>>(),
+            ["worker-[0-9]{1,3}", "infra"]
+        );
+        assert_eq!(args.namespace_include_patterns[0].as_str(), "production");
+    }
+
+    #[test]
+    fn cache_ttls_parse_from_flags() {
+        let args = parse(&[
+            "--kubelet-stats-cache-ttl",
+            "30",
+            "--system-agent-cache-ttl",
+            "60",
+            "--kubelet-health-cache-ttl",
+            "90",
+        ])
+        .expect("cache TTL flags should parse");
+        assert_eq!(args.kubelet_stats_cache_ttl, Duration::from_secs(30));
+        assert_eq!(args.system_agent_cache_ttl, Duration::from_secs(60));
+        assert_eq!(args.kubelet_health_cache_ttl, Duration::from_secs(90));
+    }
+
+    #[test]
+    fn push_interval_parse_correctly() {
+        for interval in ["1", "80"] {
+            assert!(parse(&["--push-interval", interval]).is_ok());
+        }
+    }
+
+    #[test]
+    fn push_interval_cannot_be_less_than_one() {
+        assert_eq!(
+            parse(&["--push-interval", "0"])
+                .expect_err("push interval of zero should fail")
+                .kind(),
+            ErrorKind::ValueValidation
+        );
+
+        assert_eq!(
+            parse(&["--push-interval=-1"])
+                .expect_err("push interval of -1 should fail")
+                .kind(),
+            ErrorKind::ValueValidation
+        );
+    }
+
+    #[test]
+    fn push_certificate_renewal_threshold_is_in_days() {
+        let defaults = parse(&[]).expect("minimal args should parse");
+        assert_eq!(
+            defaults.push_certificate_renewal_threshold,
+            Duration::from_hours(24 * 45)
+        );
+
+        let configured = parse(&["--push-certificate-renewal-threshold", "30"])
+            .expect("renewal threshold should parse");
+        assert_eq!(
+            configured.push_certificate_renewal_threshold,
+            Duration::from_hours(24 * 30)
+        );
+    }
+
+    #[test]
+    fn otel_password_requires_a_username() {
+        assert_eq!(
+            parse(&["--otel-password", "McBobberson"])
+                .expect_err("a password without a username should fail")
+                .kind(),
+            ErrorKind::MissingRequiredArgument
+        );
+    }
+
+    #[test]
+    fn otel_username_rejects_an_empty_value() {
+        assert!(parse(&["--otel-username", ""]).is_err());
+    }
+
+    #[test]
+    fn otel_username_without_password_is_valid() {
+        let args = parse(&["--otel-username", "bob"]).expect("a lone username should parse");
+        let auth = args
+            .otel_basic_auth()
+            .expect("a username means credentials");
+        assert_eq!(auth.username, "bob");
+        assert_eq!(auth.password, None);
+    }
+}

@@ -1,0 +1,8 @@
+---
+source: cluster-aggregator/src/section/resource_quota/mod.rs
+expression: "KubeResourceQuotaMemoryResourcesV1::from_namespace(&namespace, &indexes)"
+---
+{
+  "limit": 6442450944.0,
+  "request": 545259520.0
+}

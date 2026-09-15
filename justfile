@@ -1,8 +1,8 @@
-fetcher_tag := "cmk-rustik-metrics-fetcher:local"
-fetcher_target := "metrics-fetcher-dev"
+scraper_tag := "checkmk-kubernetes-agent-node-scraper:local"
+scraper_target := "node-scraper-dev"
 
-cache_tag := "cmk-rustik-metrics-cache:local"
-cache_target := "metrics-cache-dev"
+aggregator_tag := "checkmk-kubernetes-agent-cluster-aggregator:local"
+aggregator_target := "cluster-aggregator-dev"
 
 push := ""
 push_ott := ""
@@ -12,26 +12,26 @@ cluster_host_name := ""
 
 # Build an image for Kubernetes using Docker
 dockerize:
-    docker build -t {{fetcher_tag}} --target {{fetcher_target}} -f docker/Dockerfile .
-    docker build -t {{cache_tag}} --target {{cache_target}} -f docker/Dockerfile .
+    docker build -t {{scraper_tag}} --target {{scraper_target}} -f docker/Dockerfile .
+    docker build -t {{aggregator_tag}} --target {{aggregator_target}} -f docker/Dockerfile .
 
 # Create a kind cluster for development
 kind-create:
     sed "s#\\\$SRC_DIR\\\$#$(pwd)#" devel/kind-config.yaml | \
-      kind create cluster --name rustik --config -
+      kind create cluster --name checkmk-kubernetes-agent --config -
 
 # Load images into the kind cluster, creating it if it does not exist
 kind-load:
-    kind load docker-image {{fetcher_tag}} --name rustik
-    kind load docker-image {{cache_tag}} --name rustik
+    kind load docker-image {{scraper_tag}} --name checkmk-kubernetes-agent
+    kind load docker-image {{aggregator_tag}} --name checkmk-kubernetes-agent
 
 # Load the helm chart into the kind cluster with devel/values.yaml
 kind-helm-install: kind-registration-secret
-    helm upgrade --install cmk-rustik ./charts/cmk-rustik \
+    helm upgrade --install checkmk-agent ./charts/checkmk-agent \
       -n checkmk-monitoring --create-namespace -f devel/values.yaml \
       {{ if path_exists("devel/custom_values.yaml") == "true" { "-f devel/custom_values.yaml" } else { "" } }} \
       {{ if push != "" { "--set push.enabled=" + push } else { "" } }} \
-      {{ if push_ott + site_ca != "" { "--set push.registrationSecret=cmk-rustik-push-registration" } else { "" } }} \
+      {{ if push_ott + site_ca != "" { "--set push.registrationSecret=checkmk-agent-push-registration" } else { "" } }} \
       {{ if push_url != "" { "--set push.url=" + push_url } else { "" } }} \
       {{ if site_ca != "" { "--set push.insecureSkipSiteCaVerification=false" } else { "" } }} \
       {{ if cluster_host_name != "" { "--set clusterHostName=" + cluster_host_name } else { "" } }}
@@ -41,7 +41,7 @@ kind-helm-install: kind-registration-secret
 kind-registration-secret:
     {{ if push_ott + site_ca != "" { "kubectl create namespace checkmk-monitoring --dry-run=client -o yaml | kubectl apply -f -" } else { "true" } }}
     @{{ if push_ott + site_ca != "" { \
-        "kubectl create secret generic cmk-rustik-push-registration -n checkmk-monitoring " + \
+        "kubectl create secret generic checkmk-agent-push-registration -n checkmk-monitoring " + \
         (if push_ott != "" { "--from-literal=" + quote("token=" + push_ott) + " " } else { "" }) + \
         (if site_ca != "" { "--from-file=" + quote("site-ca-pem=" + site_ca) + " " } else { "" }) + \
         "--dry-run=client -o yaml | kubectl apply -f -" \
@@ -49,21 +49,21 @@ kind-registration-secret:
 
 # Delete the helm deployment from the kind cluster
 kind-helm-delete:
-    helm delete cmk-rustik -n checkmk-monitoring
+    helm delete checkmk-agent -n checkmk-monitoring
 
-# DEV ENV: Deploy rustik in Kind with source mounted at /src
+# DEV ENV: Deploy the agent in Kind with source mounted at /src
 kind-dev: dockerize kind-create kind-load kind-helm-install
 
 # Remove the Kind dev cluster
 kind-dev-teardown:
-    kind delete cluster --name rustik
+    kind delete cluster --name checkmk-kubernetes-agent
 
 # Run kubeconform and ct lint over the helm chart
 lint-helm:
     #!/usr/bin/env bash
     set -euo pipefail
-    for values in charts/cmk-rustik/ci/*-values.yaml; do
-      helm template rustik charts/cmk-rustik -f "$values" | kubeconform -strict -summary
+    for values in charts/checkmk-agent/ci/*-values.yaml; do
+      helm template myrelease charts/checkmk-agent -f "$values" | kubeconform -strict -summary
     done
     ct lint --all
 

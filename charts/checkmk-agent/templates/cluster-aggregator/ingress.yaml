@@ -1,0 +1,38 @@
+{{- if .Values.clusterAggregator.ingress.enabled }}
+{{- if not .Values.pull.enabled }}
+{{- fail "clusterAggregator.ingress.enabled requires pull.enabled" }}
+{{- end }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "checkmk-agent.fullname" . }}-cluster-aggregator
+  labels:
+    {{- include "checkmk-agent.labels" . | nindent 4 }}
+  {{- with .Values.clusterAggregator.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.clusterAggregator.ingress.className }}
+  ingressClassName: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.clusterAggregator.ingress.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- range .Values.clusterAggregator.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path | quote }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ include "checkmk-agent.fullname" $ }}-cluster-aggregator-pull
+                port:
+                  number: {{ $.Values.clusterAggregator.service.pullPort }}
+          {{- end }}
+    {{- end }}
+{{- end }}

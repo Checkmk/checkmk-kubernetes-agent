@@ -1,0 +1,52 @@
+use reqwest::Client;
+use std::sync::Arc;
+use std::time::Duration;
+use std::time::Instant;
+use tokio::time;
+use tracing::{error, warn};
+
+use crate::cli_args::CliArgs;
+use crate::error::Result;
+use crate::payload::Payload;
+
+pub(crate) trait Scraper {
+    async fn scrape(&self) -> Result<Payload>;
+
+    fn relay_client(&self) -> Client;
+
+    fn args(&self) -> Arc<CliArgs>;
+
+    fn poll_interval(&self) -> Duration;
+
+    async fn loop_push_scrape(self)
+    where
+        Self: Sized,
+    {
+        let mut interval = time::interval(self.poll_interval());
+        loop {
+            interval.tick().await;
+            let start = Instant::now();
+            match self.scrape().await {
+                Ok(payload) => {
+                    let scrape_duration = start.elapsed();
+                    let args = self.args();
+                    match payload
+                        .push_to_cluster_aggregator(
+                            &args.cluster_aggregator_namespace,
+                            &args.cluster_aggregator_service,
+                            &args.cluster_aggregator_ca_cert_file,
+                            args.cluster_aggregator_port,
+                            self.relay_client(),
+                            scrape_duration,
+                        )
+                        .await
+                    {
+                        Ok(_) => {}
+                        Err(e) => error!(error = ?e, "failed to push to cluster-aggregator"),
+                    }
+                }
+                Err(e) => warn!(error = ?e, "scrape failed"),
+            }
+        }
+    }
+}

@@ -35,8 +35,8 @@ jobs:
       - name: Run kubeconform
         shell: bash
         run: |
-          for values in charts/cmk-rustik/ci/*-values.yaml; do
-            helm template rustik charts/cmk-rustik -f "$values" | \
+          for values in charts/checkmk-agent/ci/*-values.yaml; do
+            helm template myrelease charts/checkmk-agent -f "$values" | \
               kubeconform -strict -summary -kubernetes-version 1.36.0 -
           done
       - name: Run chart-testing (lint)

@@ -20,7 +20,7 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          version=$(cargo pkgid -p metrics-fetcher | cut -d'#' -f2)
+          version=$(cargo pkgid -p node-scraper | cut -d'#' -f2)
           if [[ "$version" != "$RELEASE_TAG" ]]; then
             echo "Tag $RELEASE_TAG does not match Cargo.toml version $version"
             exit 1
@@ -68,7 +68,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: rustik-sbom-${{ github.ref_name }}
+          name: checkmk-kubernetes-agent-sbom-${{ github.ref_name }}
           path: release-assets
       - uses: softprops/action-gh-release@v3
         with:
@@ -99,7 +99,7 @@ jobs:
           ref: ${{ github.sha }}
       - uses: actions/download-artifact@v4
         with:
-          name: rustik-sbom-${{ github.ref_name }}
+          name: checkmk-kubernetes-agent-sbom-${{ github.ref_name }}
           path: ${{ env.SBOM_DOWNLOAD_DIR }}
       - name: Stage release SBOMs
         run: |

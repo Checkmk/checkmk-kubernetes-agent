@@ -1,0 +1,26 @@
+clusterName: ci
+clusterHostName: ci
+
+nodeScraper:
+  image:
+    repository: checkmk-kubernetes-agent-node-scraper
+    tag: local
+  extraVolumes:
+    - name: src
+      hostPath:
+        path: /src
+  extraVolumeMounts:
+    - name: src
+      mountPath: /src
+
+clusterAggregator:
+  image:
+    repository: checkmk-kubernetes-agent-cluster-aggregator
+    tag: local
+  extraVolumes:
+    - name: src
+      hostPath:
+        path: /src
+  extraVolumeMounts:
+    - name: src
+      mountPath: /src

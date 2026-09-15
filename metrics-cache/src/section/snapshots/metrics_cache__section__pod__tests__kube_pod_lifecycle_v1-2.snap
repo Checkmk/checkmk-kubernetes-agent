@@ -1,7 +1,0 @@
----
-source: metrics-cache/src/section/pod.rs
-expression: "KubePodLifecycleV1::new(\"Running\")"
----
-{
-  "phase": "running"
-}

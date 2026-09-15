@@ -1,0 +1,110 @@
+# Exercise optional fields in linting and the kind install test.
+# Arbitrary UIDs exercise OpenShift image compatibility, not SCC admission.
+# The Autopilot label is render-tested here; kind does not enforce allowlists.
+clusterName: ci
+clusterHostName: ci
+nodeScraper:
+  image:
+    repository: checkmk-kubernetes-agent-node-scraper
+    tag: local
+  extraVolumes:
+    - name: src
+      hostPath:
+        path: /src
+  extraVolumeMounts:
+    - name: src
+      mountPath: /src
+  podAnnotations:
+    example.com/purpose: chart-test
+  podLabels:
+    app: ignored-selector-override
+    example.com/team: monitoring
+  serviceAccount:
+    name: chart-test-fetcher
+    annotations:
+      example.com/identity: chart-test
+  securityContext:
+    readOnlyRootFilesystem: true
+  podSecurityContext:
+    runAsUser: 1000700000
+    runAsGroup: 0
+    fsGroup: 1000700000
+  tolerations:
+    - key: dedicated
+      operator: Equal
+      value: monitoring
+      effect: NoSchedule
+  networkInterfaceMonitoring:
+    enabled: true
+clusterAggregator:
+  image:
+    repository: checkmk-kubernetes-agent-cluster-aggregator
+    tag: local
+  extraVolumes:
+    - name: src
+      hostPath:
+        path: /src
+  extraVolumeMounts:
+    - name: src
+      mountPath: /src
+  podAnnotations:
+    example.com/purpose: chart-test
+  podLabels:
+    example.com/team: monitoring
+  serviceAccount:
+    name: chart-test-cache
+    annotations:
+      example.com/identity: chart-test
+  securityContext:
+    readOnlyRootFilesystem: true
+  podSecurityContext:
+    runAsUser: 1000700000
+    runAsGroup: 0
+    fsGroup: 1000700000
+  tolerations:
+    - key: dedicated
+      operator: Equal
+      value: monitoring
+      effect: NoSchedule
+  service:
+    intraClusterPort: 11049
+    annotations:
+      example.com/service: pull
+    ingestAnnotations:
+      example.com/service: ingest
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/component: cluster-aggregator
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/component: cluster-aggregator
+  ingress:
+    enabled: true
+    className: test-controller
+    hosts:
+      - host: checkmk-kubernetes-agent.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+pull:
+  enabled: true
+  authentication:
+    insecureRawSecretString: chart-test-only
+networkPolicy:
+  enabled: true
+  pullFrom:
+    - ipBlock:
+        cidr: 192.0.2.0/24
+gkeAutopilot:
+  enabled: true
+  matchingAllowlist: chart-test-only

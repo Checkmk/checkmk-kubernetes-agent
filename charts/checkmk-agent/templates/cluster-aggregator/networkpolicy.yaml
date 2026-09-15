@@ -1,0 +1,36 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "checkmk-agent.fullname" . }}-cluster-aggregator
+  labels:
+    {{- include "checkmk-agent.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ include "checkmk-agent.fullname" . }}-cluster-aggregator
+  policyTypes:
+    - Ingress
+    {{- if .Values.networkPolicy.egress.enabled }}
+    - Egress
+    {{- end }}
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ include "checkmk-agent.fullname" . }}-node-scraper
+      ports:
+        - protocol: TCP
+          port: {{ .Values.clusterAggregator.intraClusterPort }}
+    {{- if and .Values.pull.enabled .Values.networkPolicy.pullFrom }}
+    - from:
+        {{- toYaml .Values.networkPolicy.pullFrom | nindent 8 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.clusterAggregator.pullPort }}
+    {{- end }}
+  {{- if .Values.networkPolicy.egress.enabled }}
+  egress:
+    {{- toYaml (concat .Values.networkPolicy.egress.commonRules .Values.networkPolicy.egress.clusterAggregatorRules) | nindent 4 }}
+  {{- end }}
+{{- end }}

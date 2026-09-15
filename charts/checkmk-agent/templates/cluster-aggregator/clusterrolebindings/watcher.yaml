@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    {{- include "checkmk-agent.labels" . | nindent 4 }}
+  name: {{ include "checkmk-agent.fullname" . }}-cluster-aggregator-watcher
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "checkmk-agent.fullname" . }}-cluster-aggregator-watcher
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "checkmk-agent.serviceAccountName" (dict "root" . "component" "cluster-aggregator" "serviceAccount" .Values.clusterAggregator.serviceAccount) }}
+    namespace: {{ .Release.Namespace }}

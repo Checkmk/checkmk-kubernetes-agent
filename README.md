@@ -1,41 +1,38 @@
-# cmk-rustik
+# Checkmk Kubernetes Agent
 
 An in-cluster Kubernetes monitoring agent for Checkmk built in Rust.
 
 Supports push-mode, pull-mode, and OpenTelemetry egress to Checkmk.
 
-Under the hood, rustik is two components: *metrics-fetcher*, a `DaemonSet`
-which scrapes the Kubelet on every node for metrics (and runs the Checkmk
-Linux agent), and *metrics-cache*, a `Deployment` which watches the Kubernetes
-API, caches what the fetchers send it, and joins it all together into
+Under the hood, Checkmk Kubernetes Agent is two components: *node-scraper*, a
+`DaemonSet` which scrapes the Kubelet on every node for metrics (and runs the
+Checkmk Linux agent), and *cluster-aggregator*, a `Deployment` which watches the
+Kubernetes API, caches what the fetchers send it, and joins it all together into
 ready-to-go Checkmk sections.
-
-Note that this is a **work in progress**, but we gladly welcome early testers
-and contributions! It's also changing fast and not yet stable, so please don't
-actually rely on it for anything important yet!
 
 Interested in what we are doing? Grab a
 [daily build](https://checkmk.com/download/archive#checkmk-dailies) of Checkmk
 and a copy of this repo and
-[try rustik in your cluster](https://github.com/checkmk/cmk-rustik/wiki/Testing-on-an-unmodified-Checkmk).
+[try the agent in your cluster](https://github.com/checkmk/checkmk-kubernetes-agent/wiki/Testing-on-an-unmodified-Checkmk).
 Later in this `README.md`, you will find a list of dependencies to get the
 development environment spun up.
 
-Alternatively, we build images on each push to `master` and have a rolling
-`0.0.0-master` release of our Helm chart. You can give it a try with:
+We build images on each push to `master` and have a rolling `0.0.0-master`
+release of our Helm chart. You can give it a try with:
 
 ```bash
 kubectl create namespace checkmk-monitoring
-kubectl create secret generic rustik-push-registration \
+kubectl create secret generic checkmk-agent-push-registration \
     --from-literal=token=0:e07f1760-d9de-4bb0-a55e-a0fcc4e8355f \
     --from-file=site-ca-pem=/path/to/site-ca.pem \
     -n checkmk-monitoring
 
-helm install rustik oci://ghcr.io/checkmk/charts/cmk-rustik --version 0.0.0-master \
+helm install myrelease oci://ghcr.io/checkmk/charts/checkmk-agent \
+    --version 0.0.0-master \
     --set clusterName=mycluster \
     --set clusterHostName=my-cmk-host \
     --set push.enabled=true \
-    --set push.registrationSecret=rustik-push-registration \
+    --set push.registrationSecret=checkmk-agent-push-registration \
     --set push.url=https://your-checkmk.example.com:8000/yoursite \
     -n checkmk-monitoring
 ```
@@ -45,7 +42,8 @@ Ultimate or higher.
 
 ## Building / Dev Environment
 
-A quick list of dependencies you will likely need to build rustik:
+A quick list of dependencies you will likely need to build Checkmk Kubernetes
+Agent:
 
 * A musl toolchain, since we target Alpine (`musl-tools` on Debian-ish)
 * A Rust toolchain (we target stable, not nightly). Also helpful to have a few
@@ -90,8 +88,8 @@ rustflags = ["-C", "link-arg=-fuse-ld=mold"]
 (Do this _after_ you have a successful build with `cargo build`)
 
 Spin up the dev environment with **`just kind-dev`**. This will:
-* Build a dev image (does _not_ compile rustik in Docker like the images from CI
-  do - it's too slow in the dev env)
+* Build a dev image (does _not_ compile the agent in Docker like the images from
+  CI do - it's too slow in the dev env)
 * Spin up a kind cluster with a specific config (`devel/kind-config.yaml` + a
   `sed` to point it to the source directory).
 * Kind will mount your source directory into the Docker container running
@@ -106,7 +104,7 @@ If you are iterating on the Helm chart, you can `just kind-helm-delete` and
 (such as `kind-helm-install` but also `kind-dev`), you can pass in several
 overrides, such as
 `just push=true push_ott=0:e07f1760-d9de-4bb0-a55e-a0fcc4e8355f kind-dev`.
-This creates the `cmk-rustik-push-registration` Secret used by the chart. Set
+This creates the `checkmk-agent-push-registration` Secret used by the chart. Set
 `site_ca` to the site CA file path to test registration with certificate
 verification.
 When updating the registration Secret, supply both `push_ott` and `site_ca`

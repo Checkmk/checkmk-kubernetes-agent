@@ -1,0 +1,51 @@
+use axum::http::header::HeaderMap;
+use std::str::FromStr;
+use std::time::{Duration, Instant};
+
+pub mod api_health;
+pub mod kubelet_health;
+pub mod kubelet_stats;
+pub mod reflectors;
+pub mod system_agent;
+
+/// A payload received from `node-scraper`, along with the [`Instant`] it
+/// was received. This is stored in moka caches in [`crate::state::AppState`].
+///
+/// The timestamp is used for self-health monitoring, so that we can report
+/// how long it's been since we last heard from a node.
+#[derive(Debug)]
+pub struct NodeScraperIngestion<T> {
+    pub received_at: Instant,
+    pub metadata: NodeScraperMetadata,
+    pub payload: T,
+}
+
+/// Metadata about a payload received from `node-scraper`, such as
+/// performance information (how long a scrape took) and the version of the
+/// agent that `node-scraper` instance came from.
+#[derive(Debug, Default)]
+pub struct NodeScraperMetadata {
+    pub scrape_time: Option<Duration>,
+    pub version: Option<String>,
+    pub git_sha: Option<String>,
+}
+
+impl From<&HeaderMap> for NodeScraperMetadata {
+    fn from(headers: &HeaderMap) -> Self {
+        Self {
+            scrape_time: headers
+                .get("X-Scrape-Time-Ms")
+                .and_then(|v| v.to_str().ok())
+                .and_then(|v| u64::from_str(v).ok())
+                .map(Duration::from_millis),
+            version: headers
+                .get("X-Agent-Version")
+                .and_then(|v| v.to_str().ok())
+                .map(String::from),
+            git_sha: headers
+                .get("X-Agent-Git")
+                .and_then(|v| v.to_str().ok())
+                .map(String::from),
+        }
+    }
+}

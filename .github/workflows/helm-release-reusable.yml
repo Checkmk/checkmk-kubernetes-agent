@@ -35,10 +35,10 @@ jobs:
         run: |
           # The packaged chart must use the images built in this repository,
           # including when testing the release workflow in a fork.
-          sed -i "s|ghcr.io/checkmk/cmk-rustik-|ghcr.io/${GITHUB_REPOSITORY,,}-|g" \
-            charts/cmk-rustik/values.yaml
-          helm package charts/cmk-rustik \
+          sed -i "s|ghcr.io/checkmk/checkmk-kubernetes-agent-|ghcr.io/${GITHUB_REPOSITORY,,}-|g" \
+            charts/checkmk-agent/values.yaml
+          helm package charts/checkmk-agent \
             --version "$VERSION" \
             --app-version "sha-${{ github.sha }}"
-          helm push "cmk-rustik-$VERSION.tgz" \
+          helm push "checkmk-agent-$VERSION.tgz" \
             oci://ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts

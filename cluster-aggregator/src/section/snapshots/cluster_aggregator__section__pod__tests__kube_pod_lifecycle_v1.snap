@@ -1,0 +1,7 @@
+---
+source: cluster-aggregator/src/section/pod.rs
+expression: "KubePodLifecycleV1::new(\"Pending\")"
+---
+{
+  "phase": "pending"
+}

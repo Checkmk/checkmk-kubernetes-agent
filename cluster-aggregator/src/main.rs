@@ -1,0 +1,204 @@
+use axum_server::tls_rustls::RustlsConfig;
+use clap::Parser;
+use std::io;
+use std::net::SocketAddr;
+use tokio::sync::watch;
+use tokio::task::JoinSet;
+use tracing::{info, warn};
+use tracing_subscriber::EnvFilter;
+
+use cluster_aggregator::auth::pull_agent::PullAgentMiddlewareConfig;
+use cluster_aggregator::cli_args::CliArgs;
+use cluster_aggregator::handlers;
+use cluster_aggregator::ingest::api_health::loop_query_health;
+use cluster_aggregator::otel::client::OtelClient;
+use cluster_aggregator::otel::otel_loop;
+use cluster_aggregator::push::client::CheckmkPushClient;
+use cluster_aggregator::push::push_loop;
+use cluster_aggregator::push::register::CheckmkPushRegistration;
+use cluster_aggregator::startup::tls;
+use cluster_aggregator::state::AppState;
+
+fn init_tracing(args: &CliArgs) {
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(&args.log_level)),
+        )
+        .with_target(false)
+        .with_writer(io::stderr)
+        .init();
+}
+
+async fn bind(
+    address: &str,
+    port: u16,
+    tls: Option<RustlsConfig>,
+    app: axum::Router,
+) -> anyhow::Result<()> {
+    let addr = SocketAddr::new(address.parse()?, port);
+    match tls {
+        None => {
+            info!("cluster-aggregator binding to {} (non-TLS)", addr);
+            axum_server::bind(addr)
+                .serve(app.into_make_service())
+                .await?;
+        }
+        Some(config) => {
+            info!("cluster-aggregator binding to {} (TLS)", addr);
+            axum_server::bind_rustls(addr, config)
+                .serve(app.into_make_service())
+                .await?;
+        }
+    }
+
+    Ok(())
+}
+
+fn pull_agent_middleware(args: &CliArgs) -> anyhow::Result<PullAgentMiddlewareConfig> {
+    match (
+        args.disable_pull_authentication,
+        args.pull_shared_secret.as_deref(),
+    ) {
+        // A shared secret is configured but authentication is disabled. Which
+        // is meant?
+        (true, Some(_)) => anyhow::bail!(
+            "--disable-pull-authentication is set, but a pull shared secret is also \
+             configured. These contradict each other; set exactly one of them."
+        ),
+        // Deliberately public pull-mode endpoints.
+        (true, None) => {}
+        // Auth is desired, but secret is empty, default closed.
+        (false, Some("")) => warn!(
+            "The pull shared secret is set but empty; all pull requests will be \
+             rejected. Check the Kubernetes secret (and key) the chart references."
+        ),
+        // Normal: secret configured or pull mode unconfigured.
+        (false, _) => {}
+    }
+    Ok(PullAgentMiddlewareConfig {
+        auth_enabled: !args.disable_pull_authentication,
+        shared_secret: args.pull_shared_secret.clone(),
+    })
+}
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let args = CliArgs::parse();
+    init_tracing(&args);
+
+    // We use ring instead of aws-lc-rs
+    rustls::crypto::ring::default_provider()
+        .install_default()
+        .expect("Failed to install rustls crypto provider");
+
+    let mut reflector_tasks = JoinSet::new();
+
+    // API health channel; the receiver lives in AppState, the sender lives in
+    // the a `select!` branch future and is used on each API health endpoint
+    // poll to send in the latest result.
+    let (api_health_sender, api_health_receiver) = watch::channel(None);
+
+    let state = AppState::new(&args, &mut reflector_tasks, api_health_receiver).await?;
+    let pull_app = handlers::pull_app(state.clone(), pull_agent_middleware(&args)?);
+    let ingest_app = handlers::ingest_app(state.clone());
+
+    let push = match &args.push_receiver {
+        Some(base_url) => {
+            info!("Push receiver enabled, will push sections to Checkmk server");
+            let registration = CheckmkPushRegistration::new(state.clone().client, &args);
+            let secret = registration.register_if_needed().await?;
+            let client = CheckmkPushClient::from_secret(base_url, &secret)?;
+            Some((client, registration))
+        }
+        None => None,
+    };
+
+    let otel_client = match &args.otel_endpoint {
+        Some(base_url) => {
+            info!("OpenTelemetry enabled, will push metrics to OpenTelemetry collector");
+            Some(OtelClient::new(
+                base_url,
+                args.otel_ca_cert_file.as_deref(),
+                args.otel_basic_auth(),
+            )?)
+        }
+        None => None,
+    };
+
+    let pull_tls_config = tls::resolve(state.clone().client, args.pull_tls_config()).await?;
+    let ingest_tls_config = tls::resolve(state.clone().client, args.ingest_tls_config()).await?;
+
+    tokio::select! {
+        // Pull mode listener
+        res = bind(
+            &args.pull_address,
+            args.pull_port,
+            pull_tls_config,
+            pull_app,
+        ) => {
+            if let Err(e) = res {
+                tracing::error!(error = %e, "Axum pull-mode server exited with error");
+            }
+            anyhow::bail!("Axum pull-mode server terminated unexpectedly");
+        }
+
+        // Intra-cluster ingest mode listener
+        res = bind(
+            &args.ingest_address,
+            args.ingest_port,
+            ingest_tls_config,
+            ingest_app,
+        ) => {
+            if let Err(e) = res {
+                tracing::error!(error = %e, "Axum intra-cluster ingest server exited with error");
+            }
+            anyhow::bail!("Axum intra-cluster ingest server terminated unexpectedly");
+        }
+
+        // Reflector tasks
+        res = reflector_tasks.join_next() => {
+            tracing::error!(error = ?res, "Reflector task exited unexpectedly");
+            anyhow::bail!("Reflector task terminated unexpectedly");
+        }
+
+        // Push to Checkmk server
+        res = async {
+            match push {
+                Some((client, registration)) => push_loop(
+                    client,
+                    registration,
+                    state.clone(),
+                    args.push_interval,
+                    args.push_certificate_renewal_threshold,
+                ).await,
+                None => std::future::pending().await,
+            }
+        } => {
+            if let Err(e) = res {
+                tracing::error!(error = %e, "push loop exited with error");
+            }
+            anyhow::bail!("push loop terminated unexpectedly");
+        }
+
+        // Push to OpenTelemetry collector
+        () = async {
+            match otel_client {
+                Some(client) => otel_loop(client, state.clone(), args.otel_push_interval).await,
+                None => std::future::pending().await,
+            }
+        } => {
+            tracing::error!("OpenTelemetry loop exited unexpectedly");
+            anyhow::bail!("OpenTelemetry loop terminated unexpectedly");
+        }
+
+        // Kubernetes API server health polls (/readyz and /livez)
+        res = async {
+            loop_query_health(state.client.clone(), api_health_sender, args.api_health_poll_interval).await
+        } => {
+            if let Err(e) = res {
+                tracing::error!(error = %e, "API health polling loop exited with error");
+            }
+            anyhow::bail!("API health polling loop terminated unexpectedly");
+        }
+    }
+}

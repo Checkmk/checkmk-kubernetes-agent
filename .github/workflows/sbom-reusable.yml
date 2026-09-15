@@ -39,12 +39,12 @@ jobs:
           SBOM_DIR: sbom/${{ inputs.version }}
         run: |
           mkdir -p "$SBOM_DIR"
-          install -m 0644 metrics-cache/bom.xml \
-            "$SBOM_DIR/metrics-cache-bom.xml"
-          install -m 0644 metrics-fetcher/bom.xml \
-            "$SBOM_DIR/metrics-fetcher-bom.xml"
+          install -m 0644 cluster-aggregator/bom.xml \
+            "$SBOM_DIR/cluster-aggregator-bom.xml"
+          install -m 0644 node-scraper/bom.xml \
+            "$SBOM_DIR/node-scraper-bom.xml"
       - uses: actions/upload-artifact@v4
         with:
-          name: rustik-sbom-${{ inputs.version }}
+          name: checkmk-kubernetes-agent-sbom-${{ inputs.version }}
           path: sbom/${{ inputs.version }}
           if-no-files-found: error

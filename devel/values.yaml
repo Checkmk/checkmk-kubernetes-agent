@@ -1,11 +1,11 @@
 # values.yaml overrides for the dev env (`just kind-dev`)
 clusterName: kind
 clusterHostName: kind
-logLevel: warn,metrics_cache=debug,metrics_fetcher=debug
+logLevel: warn,cluster_aggregator=debug,node_scraper=debug
 
-metricsFetcher:
+nodeScraper:
   image:
-    repository: cmk-rustik-metrics-fetcher
+    repository: checkmk-kubernetes-agent-node-scraper
     tag: local
   extraVolumes:
     - name: src
@@ -15,9 +15,9 @@ metricsFetcher:
     - name: src
       mountPath: /src
 
-metricsCache:
+clusterAggregator:
   image:
-    repository: cmk-rustik-metrics-cache
+    repository: checkmk-kubernetes-agent-cluster-aggregator
     tag: local
 
   service:

@@ -1,0 +1,10 @@
+---
+source: cluster-aggregator/src/section/performance.rs
+expression: "KubePerformanceMemoryV1::new(104_857_600)"
+---
+{
+  "resource": {
+    "type_": "memory",
+    "usage": 104857600.0
+  }
+}

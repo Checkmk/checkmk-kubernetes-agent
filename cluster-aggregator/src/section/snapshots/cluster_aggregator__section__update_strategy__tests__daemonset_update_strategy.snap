@@ -1,0 +1,11 @@
+---
+source: cluster-aggregator/src/section/update_strategy.rs
+expression: "KubeUpdateStrategyV1::from_daemonset(&daemonset)"
+---
+{
+  "strategy": {
+    "type_": "RollingUpdate",
+    "max_surge": 0,
+    "max_unavailable": 1
+  }
+}

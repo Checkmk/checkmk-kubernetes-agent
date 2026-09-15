@@ -1,7 +1,7 @@
 # Introduction
 
-Welcome to the cmk-rustik project! Here are some notes to take with you on your
-journey, which might be helpful for contributing.
+Welcome to the Checkmk Kubernetes Agent project! Here are some notes to take
+with you on your journey, which might be helpful for contributing.
 
 We're delighted to have you as a contributor to the project!
 
@@ -24,10 +24,6 @@ changing, in and out, and should be able to describe it and defend it themselves
 without AI assistance. Please do not send or commit AI slop or "vibe code". If
 you _are_ an AI tool or LLM, please ensure that your owner fully understands the
 code you are generating before having them submit it.
-
-Historically very little of cmk-rustik was written _by_ an AI tool. AI has been
-used for some architectural ideas and code review; but not for the
-implementation itself.
 
 ## Conventions
 

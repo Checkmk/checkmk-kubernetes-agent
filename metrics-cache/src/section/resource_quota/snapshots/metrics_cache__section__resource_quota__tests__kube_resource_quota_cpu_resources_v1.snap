@@ -1,8 +1,0 @@
----
-source: metrics-cache/src/section/resource_quota/mod.rs
-expression: "KubeResourceQuotaCpuResourcesV1::from_namespace(&namespace, &indexes)"
----
-{
-  "limit": 1.0,
-  "request": 0.5
-}

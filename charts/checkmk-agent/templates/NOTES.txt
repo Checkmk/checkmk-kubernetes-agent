@@ -1,0 +1,71 @@
+{{- $fullname := include "checkmk-agent.fullname" . -}}
+{{- $pullService := printf "%s-cluster-aggregator-pull" $fullname -}}
+{{- $scheme := ternary "https" "http" .Values.pull.encryption.enabled -}}
+Checkmk Kubernetes Agent has been installed.
+
+{{ if and .Values.pull.enabled .Values.push.enabled -}}
+Pull and push modes are enabled.
+{{- else if .Values.pull.enabled -}}
+Pull mode is enabled.
+{{- else if .Values.push.enabled -}}
+Push mode is enabled.
+{{- else -}}
+Neither pull nor push mode is enabled. Enable pull.enabled, push.enabled, or
+both to transfer monitoring data to Checkmk.
+{{- end }}
+
+{{- if .Values.push.enabled }}
+
+Push mode sends monitoring data to:
+  {{ .Values.push.url }}
+{{- end }}
+
+{{- if .Values.pull.enabled }}
+{{ if .Values.clusterAggregator.ingress.enabled }}
+{{- $ingressScheme := ternary "https" "http" (gt (len .Values.clusterAggregator.ingress.tls) 0) }}
+The pull endpoint is exposed by the configured Ingress:
+{{- range $host := .Values.clusterAggregator.ingress.hosts }}
+{{- range $host.paths }}
+  {{ $ingressScheme }}://{{ $host.host }}{{ .path }}
+{{- end }}
+{{- end }}
+
+Inspect its assigned addresses with:
+  kubectl --namespace {{ .Release.Namespace }} get ingress {{ $fullname }}-cluster-aggregator
+{{- else if eq .Values.clusterAggregator.service.type "LoadBalancer" }}
+The pull endpoint will be available through the LoadBalancer Service. It may
+take a few minutes for an external address to be assigned. Watch its status:
+  kubectl --namespace {{ .Release.Namespace }} get service {{ $pullService }} --watch
+
+Then use:
+  {{ $scheme }}://<external-address>:{{ .Values.clusterAggregator.service.pullPort }}
+{{- else if eq .Values.clusterAggregator.service.type "NodePort" }}
+The pull endpoint is exposed on a port of every Kubernetes node. Find the
+assigned port and suitable node addresses with:
+  kubectl --namespace {{ .Release.Namespace }} get service {{ $pullService }}
+  kubectl get nodes -o wide
+
+Then use:
+{{- if .Values.clusterAggregator.service.nodePort }}
+  {{ $scheme }}://<node-address>:{{ .Values.clusterAggregator.service.nodePort }}
+{{- else }}
+  {{ $scheme }}://<node-address>:<node-port>
+{{- end }}
+{{- else if eq .Values.clusterAggregator.service.type "ClusterIP" }}
+The pull endpoint is available inside the cluster at:
+  {{ $scheme }}://{{ $pullService }}.{{ .Release.Namespace }}.svc:{{ .Values.clusterAggregator.service.pullPort }}
+
+For temporary local access, run:
+  kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ $pullService }} {{ .Values.clusterAggregator.service.pullPort }}:{{ .Values.clusterAggregator.service.pullPort }}
+{{- else }}
+Inspect the pull Service to find its address:
+  kubectl --namespace {{ .Release.Namespace }} get service {{ $pullService }}
+{{- end }}
+
+{{ if .Values.pull.authentication.enabled -}}
+Pull authentication uses Secret `{{ include "checkmk-agent.pullSharedSecretName" . }}`,
+key `{{ include "checkmk-agent.pullSharedSecretKey" . }}`, in namespace `{{ .Release.Namespace }}`.
+{{- else -}}
+Pull authentication is disabled.
+{{- end }}
+{{- end }}

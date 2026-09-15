@@ -1,0 +1,176 @@
+{{- $kubeletTLS := .Values.nodeScraper.kubeletTls -}}
+{{- $caSource := $kubeletTLS.caSource -}}
+{{- $serverIdentity := $kubeletTLS.serverIdentity -}}
+{{- if not (has $caSource (list "disabled" "service-account" "secret" "config-map")) -}}
+{{- fail "nodeScraper.kubeletTls.caSource must be one of disabled, service-account, secret, or config-map" -}}
+{{- end -}}
+{{- if not (has $serverIdentity (list "node-ip" "node-name" "ca-only")) -}}
+{{- fail "nodeScraper.kubeletTls.serverIdentity must be one of node-ip, node-name, or ca-only" -}}
+{{- end -}}
+{{- if and (eq $caSource "secret") (not $kubeletTLS.existingSecret.name) -}}
+{{- fail "nodeScraper.kubeletTls.existingSecret.name is required when caSource is secret" -}}
+{{- end -}}
+{{- if and (eq $caSource "config-map") (not $kubeletTLS.existingConfigMap.name) -}}
+{{- fail "nodeScraper.kubeletTls.existingConfigMap.name is required when caSource is config-map" -}}
+{{- end -}}
+{{- $customKubeletCA := or (eq $caSource "secret") (eq $caSource "config-map") -}}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    {{- include "checkmk-agent.labels" . | nindent 4 }}
+  name: {{ include "checkmk-agent.fullname" . }}-node-scraper
+spec:
+  minReadySeconds: {{ .Values.nodeScraper.minReadySeconds }}
+  selector:
+    matchLabels:
+      app: {{ include "checkmk-agent.fullname" . }}-node-scraper
+  template:
+    metadata:
+      {{- if or .Values.nodeScraper.podAnnotations .Values.openshift.hostPathSCC.enabled }}
+      annotations:
+        {{- if .Values.openshift.hostPathSCC.enabled }}
+        openshift.io/required-scc: {{ include "checkmk-agent.nodeScraperSCCName" . }}
+        {{- end }}
+        {{- with (omit .Values.nodeScraper.podAnnotations "openshift.io/required-scc") }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      labels:
+        {{- include "checkmk-agent.labels" . | nindent 8 }}
+        {{- if .Values.gkeAutopilot.enabled }}
+        cloud.google.com/matching-allowlist: {{ required "gkeAutopilot.matchingAllowlist must name an installed Checkmk Kubernetes Agent WorkloadAllowlist" .Values.gkeAutopilot.matchingAllowlist | quote }}
+        {{- end }}
+        app.kubernetes.io/component: node-scraper
+        app: {{ include "checkmk-agent.fullname" . }}-node-scraper
+        {{- with (omit .Values.nodeScraper.podLabels "cloud.google.com/matching-allowlist" "app" "helm.sh/chart" "app.kubernetes.io/name" "app.kubernetes.io/instance" "app.kubernetes.io/version" "app.kubernetes.io/managed-by" "app.kubernetes.io/component") }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.nodeScraper.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeScraper.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeScraper.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeScraper.priorityClassName }}
+      priorityClassName: {{ . | quote }}
+      {{- end }}
+      serviceAccountName: {{ include "checkmk-agent.serviceAccountName" (dict "root" . "component" "node-scraper" "serviceAccount" .Values.nodeScraper.serviceAccount) }}
+      {{- with .Values.nodeScraper.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.nodeScraper.extraVolumes .Values.intraClusterCommunication.encryption.enabled .Values.nodeScraper.networkInterfaceMonitoring.enabled $customKubeletCA }}
+      volumes:
+        {{- if .Values.nodeScraper.networkInterfaceMonitoring.enabled }}
+        - name: host-sys
+          hostPath:
+            path: /sys
+            type: Directory
+        {{- end }}
+        {{- with .Values.nodeScraper.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.intraClusterCommunication.encryption.enabled }}
+        - name: intra-cluster-ca
+          secret:
+            secretName: {{ include "checkmk-agent.intraClusterTLSSecretName" . }}
+            items:
+              - key: ca.crt
+                path: intra-cluster-ca.crt
+        {{- end }}
+        {{- if eq $caSource "secret" }}
+        - name: kubelet-ca
+          secret:
+            secretName: {{ $kubeletTLS.existingSecret.name | quote }}
+            items:
+              - key: {{ $kubeletTLS.existingSecret.key | quote }}
+                path: ca.crt
+        {{- else if eq $caSource "config-map" }}
+        - name: kubelet-ca
+          configMap:
+            name: {{ $kubeletTLS.existingConfigMap.name | quote }}
+            items:
+              - key: {{ $kubeletTLS.existingConfigMap.key | quote }}
+                path: ca.crt
+        {{- end }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeScraper.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: node-scraper
+          image: {{ include "checkmk-agent.image" (dict "root" . "image" .Values.nodeScraper.image) | quote }}
+          imagePullPolicy: {{ .Values.nodeScraper.image.pullPolicy }}
+          {{- with .Values.nodeScraper.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          args:
+            - --kubelet-stats-poll-interval={{ .Values.nodeScraper.kubeletStatsPollInterval }}
+            - --kubelet-health-poll-interval={{ .Values.nodeScraper.kubeletHealthPollInterval }}
+            - --system-agent-poll-interval={{ .Values.nodeScraper.systemAgentPollInterval }}
+            - --system-agent-timeout={{ .Values.nodeScraper.systemAgentTimeout }}
+            - --cluster-aggregator-namespace={{ .Release.Namespace }}
+            - --cluster-aggregator-service={{ include "checkmk-agent.fullname" . }}-cluster-aggregator-ingest
+            - --cluster-aggregator-port={{ .Values.clusterAggregator.service.intraClusterPort }}
+            {{- if .Values.intraClusterCommunication.encryption.enabled }}
+            - --cluster-aggregator-ca-cert-file=/etc/ssl/certs/intra-cluster-ca.crt
+            {{- end }}
+            {{- if ne $caSource "disabled" }}
+            {{- if eq $caSource "service-account" }}
+            - --kubelet-ca-cert-file=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            {{- else }}
+            - --kubelet-ca-cert-file=/etc/checkmk-kubernetes-agent/kubelet-ca/ca.crt
+            {{- end }}
+            - --kubelet-server-identity={{ $serverIdentity }}
+            {{- end }}
+          env:
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: RUST_LOG
+              value: {{ .Values.nodeScraper.logLevel | default .Values.logLevel }}
+          {{- if or .Values.nodeScraper.extraVolumeMounts .Values.intraClusterCommunication.encryption.enabled .Values.nodeScraper.networkInterfaceMonitoring.enabled $customKubeletCA }}
+          volumeMounts:
+            {{- if .Values.nodeScraper.networkInterfaceMonitoring.enabled }}
+            - name: host-sys
+              mountPath: /host/sys
+              readOnly: true
+            {{- end }}
+            {{- with .Values.nodeScraper.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- if .Values.intraClusterCommunication.encryption.enabled }}
+            - name: intra-cluster-ca
+              readOnly: true
+              mountPath: /etc/ssl/certs/intra-cluster-ca.crt
+              subPath: intra-cluster-ca.crt
+            {{- end }}
+            {{- if $customKubeletCA }}
+            - name: kubelet-ca
+              readOnly: true
+              mountPath: /etc/checkmk-kubernetes-agent/kubelet-ca
+            {{- end }}
+          {{- end }}
+          {{- with .Values.nodeScraper.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
