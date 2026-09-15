@@ -273,12 +273,14 @@ nodeScraper:
 
   # kubeletStatsPollInterval is how often, in seconds, kubelet stats are polled.
   # Must be a whole number greater than zero. Keep this below
-  # clusterAggregator.kubeletStatsCacheTtl so samples do not expire between polls.
+  # clusterAggregator.kubeletStatsCacheTtl so samples do not expire between
+  # polls.
   kubeletStatsPollInterval: 60
 
-  # kubeletHealthPollInterval is how often, in seconds, kubelet health is polled.
-  # Must be a whole number greater than zero. Keep this below
-  # clusterAggregator.kubeletHealthCacheTtl so samples do not expire between polls.
+  # kubeletHealthPollInterval is how often, in seconds, kubelet health is
+  # polled. Must be a whole number greater than zero. Keep this below
+  # clusterAggregator.kubeletHealthCacheTtl so samples do not expire between
+  # polls.
   kubeletHealthPollInterval: 60
 
   # kubeletTls configures verification of the kubelet certificate. Verification
@@ -286,7 +288,7 @@ nodeScraper:
   # make the kubelet CA available to workloads.
   kubeletTls:
     # caSource selects the CA bundle used for verification. Supported values
-    # are: disabled, service-account, secret, and config-map. The service-account
+    # are: disabled, service-account, secret, and config-map. Theservice-account
     # source uses /var/run/secrets/kubernetes.io/serviceaccount/ca.crt, which is
     # not the kubelet CA on every Kubernetes distribution, including OpenShift.
     caSource: disabled
@@ -314,7 +316,8 @@ nodeScraper:
 
   # systemAgentPollInterval is how often, in seconds, the system agent runs.
   # Must be a whole number greater than zero. Keep this below
-  # clusterAggregator.systemAgentCacheTtl so samples do not expire between polls.
+  # clusterAggregator.systemAgentCacheTtl so samples do not expire between
+  # polls.
   systemAgentPollInterval: 60
 
   # systemAgentTimeout is the timeout in seconds for each system-agent run.
@@ -418,8 +421,8 @@ pull:
     # setting both (or neither) while authentication is enabled is an error.
     # insecureRawSecretString: "very_s3cret!!!"
 
-  # encryption configures TLS for the pull listener. If existingSecret is
-  # empty, cluster-aggregator creates and reuses a Secret containing a CA and server
+  # encryption configures TLS for the pull listener. If existingSecret is empty,
+  # cluster-aggregator creates and reuses a Secret containing a CA and server
   # certificate. If existingSecret is set, it must already exist and contain
   # tls.crt and tls.key; cluster-aggregator will not generate or replace it.
   # When the pull Service is a NodePort or LoadBalancer, existingSecret is
@@ -445,7 +448,8 @@ otel:
   tls:
     # Optional existing Secret in the release namespace containing a PEM CA
     # bundle in ca.crt, used in addition to default trusted CAs to verify the
-    # collector's certificate. Restart cluster-aggregator after changing the bundle.
+    # collector's certificate. Restart cluster-aggregator after changing the
+    # bundle.
     caSecret: ""
   # interval is how often, in seconds, metrics are collected and exported to
   # the collector. Must be greater than zero.
@@ -518,9 +522,10 @@ emitAll:
 # and cluster-aggregator. Encryption is enabled by default.
 intraClusterCommunication:
   # encryption configures TLS for the ingestion listener. If existingSecret is
-  # empty, cluster-aggregator creates and reuses a Secret containing a CA and server
-  # certificate. If existingSecret is set, it must already exist and contain
-  # tls.crt, tls.key, and ca.crt; cluster-aggregator will not generate or replace it.
+  # empty, cluster-aggregator creates and reuses a Secret containing a CA and
+  # server certificate. If existingSecret is set, it must already exist and
+  # contain tls.crt, tls.key, and ca.crt; cluster-aggregator will not generate
+  # or replace it.
   encryption:
     enabled: true
     existingSecret: ""
@@ -544,7 +549,9 @@ networkPolicy:
     enabled: false
     # commonRules contains native NetworkPolicyEgressRule objects for both Pods.
     commonRules: []
-    # clusterAggregatorRules adds cache egress, e.g. push receiver and OTLP collector.
+    # clusterAggregatorRules adds cluster aggregator egress, e.g. push receiver
+    # and OTLP collector.
     clusterAggregatorRules: []
-    # nodeScraperRules adds fetcher egress, e.g. node CIDRs on kubelet TCP 10250.
+    # nodeScraperRules adds node scraper egress, e.g. node CIDRs on kubelet TCP
+    # 10250.
     nodeScraperRules: []

@@ -66,8 +66,9 @@ pub struct CliArgs {
     )]
     pub ingest_tls_secret_generation_validity: Duration,
 
-    /// Service accounts that have access to query data from the metrics cache
-    /// API GET endpoints. Comma-separated, in the form NAMESPACE:SERVICEACCOUNT
+    /// Service accounts that have access to query data from the cluster
+    /// aggregator API GET endpoints. Comma-separated, in the form
+    /// NAMESPACE:SERVICEACCOUNT
     #[arg(
         long,
         alias = "reader-whitelist",
@@ -76,8 +77,8 @@ pub struct CliArgs {
     )]
     pub reader_allowlist: Vec<String>,
 
-    /// Service accounts that have access to query data from the metrics cache
-    /// API POST endpoints. Comma-separated, in the form
+    /// Service accounts that have access to query data from the cluster
+    /// aggregator API POST endpoints. Comma-separated, in the form
     /// NAMESPACE:SERVICEACCOUNT
     #[arg(
         long,
@@ -145,7 +146,7 @@ pub struct CliArgs {
     )]
     pub pull_tls_secret_generate_if_missing: bool,
 
-    /// When generating the pull-mode  TLS CA and certificate, specifies how
+    /// When generating the pull-mode TLS CA and certificate, specifies how
     /// long they should be valid for in days
     #[arg(
         long,

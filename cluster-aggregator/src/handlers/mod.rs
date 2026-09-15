@@ -28,7 +28,7 @@ pub fn pull_app<V: TokenValidator>(state: AppState<V>, pull: PullAgentMiddleware
 /// Ingestion shares state with the rest of the application, but is considered
 /// its own app for purposes of TLS termination: We want node-scraper to be
 /// able to communicate to cluster-aggregator using a separate set of TLS credentials
-/// than anything else which talks to metrics cache (such as an Ingress).
+/// than anything else which talks to the cluster aggregator (such as an Ingress).
 pub fn ingest_app<V: TokenValidator>(state: AppState<V>) -> Router {
     let routes = Router::new()
         .route(

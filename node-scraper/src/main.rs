@@ -36,8 +36,8 @@ async fn main() -> Result<()> {
         .install_default()
         .expect("Failed to install rustls crypto provider");
 
-    // Client to communicate with metrics cache; we allocate it just once, up front,
-    // and share it between scrapers.
+    // Client to communicate with the cluster aggregator; we allocate it just
+    // once, up front, and share it between scrapers.
     let cluster_aggregator_client = match args.cluster_aggregator_ca_cert_file.as_deref() {
         Some(file) => {
             let pem = tokio::fs::read(file).await?;
