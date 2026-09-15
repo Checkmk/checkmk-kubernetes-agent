@@ -100,13 +100,14 @@ metricsCache:
     pullPolicy: IfNotPresent
 
   # service configures the ports exposed by the Kubernetes Services in front
-  # of metrics-cache. The pull Service may be exposed as a NodePort; the
-  # intra-cluster ingestion Service is always a ClusterIP.
+  # of metrics-cache. The pull Service may be a ClusterIP, NodePort, or
+  # LoadBalancer; the intra-cluster ingestion Service is always a ClusterIP.
   service:
     # annotations configures the pull Service, e.g. for cloud load balancers.
     annotations: {}
     # ingestAnnotations configures the internal ingestion Service.
     ingestAnnotations: {}
+    # type controls how the pull Service is exposed.
     type: ClusterIP
     # pullPort is the port exposed by the pull Service.
     pullPort: 10050
