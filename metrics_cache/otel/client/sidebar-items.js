@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["OtelClient"]};
+window.SIDEBAR_ITEMS = {"struct":["BasicAuth","OtelClient"]};
