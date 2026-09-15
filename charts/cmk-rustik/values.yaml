@@ -42,138 +42,6 @@ openshift:
   hostPathSCC:
     enabled: false
 
-# metricsFetcher defines settings that control the daemon running on each
-# node in the cluster, collecting (or "fetching") metrics about the node's
-# kubelet and running the Checkmk agent on the node.
-metricsFetcher:
-  # networkInterfaceMonitoring mounts the node's /sys at /host/sys, read-only,
-  # for the bundled Checkmk network-interface plugin. Requires hostPath access.
-  networkInterfaceMonitoring:
-    enabled: false
-
-  # serviceAccount configures the component's Kubernetes identity.
-  # Existing accounts still receive the chart's RBAC bindings. Use different
-  # accounts for cache and fetcher to keep their permissions separate.
-  serviceAccount:
-    create: true
-    # name defaults to the component's generated name, even if create is false.
-    name: ""
-    annotations: {}
-
-  # podSecurityContext applies to all containers in the Pod.
-  # Without an admission override, the official images use UID/GID 10001.
-  podSecurityContext:
-    runAsNonRoot: true
-    seccompProfile:
-      type: RuntimeDefault
-  # securityContext applies to the component container.
-  securityContext:
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
-
-  # tolerations allows scheduling on tainted nodes, e.g. control-plane nodes.
-  tolerations: []
-  # affinity accepts Kubernetes node affinity and Pod (anti-)affinity rules.
-  affinity: {}
-  # topologySpreadConstraints spreads Pods across nodes or zones.
-  topologySpreadConstraints: []
-  # priorityClassName selects an existing PriorityClass.
-  priorityClassName: ""
-  # minReadySeconds is how long a Pod must be ready before it is available.
-  minReadySeconds: 0
-
-  # podAnnotations adds annotations to Pods.
-  podAnnotations: {}
-  # podLabels adds Pod labels. Chart-owned labels take precedence.
-  podLabels: {}
-
-  # kubeletStatsPollInterval is how often, in seconds, kubelet stats are polled.
-  # Must be a whole number greater than zero. Keep this below
-  # metricsCache.kubeletStatsCacheTtl so samples do not expire between polls.
-  kubeletStatsPollInterval: 60
-
-  # kubeletHealthPollInterval is how often, in seconds, kubelet health is polled.
-  # Must be a whole number greater than zero. Keep this below
-  # metricsCache.kubeletHealthCacheTtl so samples do not expire between polls.
-  kubeletHealthPollInterval: 60
-
-  # kubeletTls configures verification of the kubelet certificate. Verification
-  # is disabled by default because Kubernetes distributions do not consistently
-  # make the kubelet CA available to workloads.
-  kubeletTls:
-    # caSource selects the CA bundle used for verification. Supported values
-    # are: disabled, service-account, secret, and config-map. The service-account
-    # source uses /var/run/secrets/kubernetes.io/serviceaccount/ca.crt, which is
-    # not the kubelet CA on every Kubernetes distribution, including OpenShift.
-    caSource: disabled
-
-    # serverIdentity selects how the kubelet certificate identity is verified:
-    # node-ip requires the node IP in the certificate SANs; node-name requires
-    # the Kubernetes node name in the DNS SANs; ca-only verifies the certificate
-    # chain without verifying SANs. ca-only is weaker because any certificate
-    # signed by the selected CA can identify the kubelet.
-    serverIdentity: node-ip
-
-    # existingSecret selects a Secret in the release namespace when caSource is
-    # secret. Restart the metrics-fetcher Pods after updating its CA bundle.
-    existingSecret:
-      name: ""
-      key: ca.crt
-
-    # existingConfigMap selects a ConfigMap in the release namespace when
-    # caSource is config-map. Restart the metrics-fetcher Pods after updating
-    # its CA bundle. OpenShift's kubelet CA is maintained separately in
-    # openshift-config-managed/kubelet-serving-ca and is not synchronized here.
-    existingConfigMap:
-      name: ""
-      key: ca.crt
-
-  # systemAgentPollInterval is how often, in seconds, the system agent runs.
-  # Must be a whole number greater than zero. Keep this below
-  # metricsCache.systemAgentCacheTtl so samples do not expire between polls.
-  systemAgentPollInterval: 60
-
-  # systemAgentTimeout is the timeout in seconds for each system-agent run.
-  # Must be a whole number greater than zero.
-  systemAgentTimeout: 15
-
-  # image allows you to override the metrics-fetcher container image properties.
-  image:
-    # repository is the registry path and image name, without the tag.
-    repository: ghcr.io/checkmk/cmk-rustik-metrics-fetcher
-    # tag is the image tag or version to use. It defaults to the app version.
-    tag: ""
-    # digest pins an immutable image (e.g. sha256:...). Takes precedence over tag.
-    digest: ""
-    # pullPolicy defines when and if Kubernetes should repull.
-    pullPolicy: IfNotPresent
-
-  # resources lets you limit and request cluster resources for metrics-fetcher.
-  # see: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  # resources:
-  #   limits:
-  #     memory: 32Mi
-  #   requests:
-  #     cpu: 50m
-  #     memory: 16Mi
-
-  # logLevel controls how verbose metrics-fetcher is when writing to stderr.
-  # Inherits top-level logLevel by default.
-  logLevel: ""
-
-  # nodeSelector controls which nodes run metrics-fetcher. The default avoids
-  # scheduling the Linux-only image and Checkmk agent on Windows nodes.
-  nodeSelector:
-    kubernetes.io/os: linux
-
-  # extraVolumes adds Kubernetes volume definitions to the Pod.
-  extraVolumes: []
-  # extraVolumeMounts is volume mounts to mount in the metrics-fetcher container.
-  extraVolumeMounts: []
-
 # metricsCache defines settings that control the daemon caching all information
 # about the cluster and serving that information to Checkmk for monitoring.
 metricsCache:
@@ -352,6 +220,138 @@ metricsCache:
   # overall cluster health. Should be lower than push.interval if push mode is
   # used and lower than your check interval if pull mode is used.
   apiHealthPollInterval: 45
+
+# metricsFetcher defines settings that control the daemon running on each
+# node in the cluster, collecting (or "fetching") metrics about the node's
+# kubelet and running the Checkmk agent on the node.
+metricsFetcher:
+  # networkInterfaceMonitoring mounts the node's /sys at /host/sys, read-only,
+  # for the bundled Checkmk network-interface plugin. Requires hostPath access.
+  networkInterfaceMonitoring:
+    enabled: false
+
+  # serviceAccount configures the component's Kubernetes identity.
+  # Existing accounts still receive the chart's RBAC bindings. Use different
+  # accounts for cache and fetcher to keep their permissions separate.
+  serviceAccount:
+    create: true
+    # name defaults to the component's generated name, even if create is false.
+    name: ""
+    annotations: {}
+
+  # podSecurityContext applies to all containers in the Pod.
+  # Without an admission override, the official images use UID/GID 10001.
+  podSecurityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  # securityContext applies to the component container.
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+  # tolerations allows scheduling on tainted nodes, e.g. control-plane nodes.
+  tolerations: []
+  # affinity accepts Kubernetes node affinity and Pod (anti-)affinity rules.
+  affinity: {}
+  # topologySpreadConstraints spreads Pods across nodes or zones.
+  topologySpreadConstraints: []
+  # priorityClassName selects an existing PriorityClass.
+  priorityClassName: ""
+  # minReadySeconds is how long a Pod must be ready before it is available.
+  minReadySeconds: 0
+
+  # podAnnotations adds annotations to Pods.
+  podAnnotations: {}
+  # podLabels adds Pod labels. Chart-owned labels take precedence.
+  podLabels: {}
+
+  # kubeletStatsPollInterval is how often, in seconds, kubelet stats are polled.
+  # Must be a whole number greater than zero. Keep this below
+  # metricsCache.kubeletStatsCacheTtl so samples do not expire between polls.
+  kubeletStatsPollInterval: 60
+
+  # kubeletHealthPollInterval is how often, in seconds, kubelet health is polled.
+  # Must be a whole number greater than zero. Keep this below
+  # metricsCache.kubeletHealthCacheTtl so samples do not expire between polls.
+  kubeletHealthPollInterval: 60
+
+  # kubeletTls configures verification of the kubelet certificate. Verification
+  # is disabled by default because Kubernetes distributions do not consistently
+  # make the kubelet CA available to workloads.
+  kubeletTls:
+    # caSource selects the CA bundle used for verification. Supported values
+    # are: disabled, service-account, secret, and config-map. The service-account
+    # source uses /var/run/secrets/kubernetes.io/serviceaccount/ca.crt, which is
+    # not the kubelet CA on every Kubernetes distribution, including OpenShift.
+    caSource: disabled
+
+    # serverIdentity selects how the kubelet certificate identity is verified:
+    # node-ip requires the node IP in the certificate SANs; node-name requires
+    # the Kubernetes node name in the DNS SANs; ca-only verifies the certificate
+    # chain without verifying SANs. ca-only is weaker because any certificate
+    # signed by the selected CA can identify the kubelet.
+    serverIdentity: node-ip
+
+    # existingSecret selects a Secret in the release namespace when caSource is
+    # secret. Restart the metrics-fetcher Pods after updating its CA bundle.
+    existingSecret:
+      name: ""
+      key: ca.crt
+
+    # existingConfigMap selects a ConfigMap in the release namespace when
+    # caSource is config-map. Restart the metrics-fetcher Pods after updating
+    # its CA bundle. OpenShift's kubelet CA is maintained separately in
+    # openshift-config-managed/kubelet-serving-ca and is not synchronized here.
+    existingConfigMap:
+      name: ""
+      key: ca.crt
+
+  # systemAgentPollInterval is how often, in seconds, the system agent runs.
+  # Must be a whole number greater than zero. Keep this below
+  # metricsCache.systemAgentCacheTtl so samples do not expire between polls.
+  systemAgentPollInterval: 60
+
+  # systemAgentTimeout is the timeout in seconds for each system-agent run.
+  # Must be a whole number greater than zero.
+  systemAgentTimeout: 15
+
+  # image allows you to override the metrics-fetcher container image properties.
+  image:
+    # repository is the registry path and image name, without the tag.
+    repository: ghcr.io/checkmk/cmk-rustik-metrics-fetcher
+    # tag is the image tag or version to use. It defaults to the app version.
+    tag: ""
+    # digest pins an immutable image (e.g. sha256:...). Takes precedence over tag.
+    digest: ""
+    # pullPolicy defines when and if Kubernetes should repull.
+    pullPolicy: IfNotPresent
+
+  # resources lets you limit and request cluster resources for metrics-fetcher.
+  # see: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  # resources:
+  #   limits:
+  #     memory: 32Mi
+  #   requests:
+  #     cpu: 50m
+  #     memory: 16Mi
+
+  # logLevel controls how verbose metrics-fetcher is when writing to stderr.
+  # Inherits top-level logLevel by default.
+  logLevel: ""
+
+  # nodeSelector controls which nodes run metrics-fetcher. The default avoids
+  # scheduling the Linux-only image and Checkmk agent on Windows nodes.
+  nodeSelector:
+    kubernetes.io/os: linux
+
+  # extraVolumes adds Kubernetes volume definitions to the Pod.
+  extraVolumes: []
+  # extraVolumeMounts is volume mounts to mount in the metrics-fetcher container.
+  extraVolumeMounts: []
 
 # push allows you to enable, disable, and configure push mode; pushing data
 # *into* Checkmk from the cluster.
