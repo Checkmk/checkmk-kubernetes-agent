@@ -153,12 +153,12 @@ metricsFetcher:
 
   # resources lets you limit and request cluster resources for metrics-fetcher.
   # see: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  resources:
-    limits:
-      memory: 32Mi
-    requests:
-      cpu: 50m
-      memory: 16Mi
+  # resources:
+  #   limits:
+  #     memory: 32Mi
+  #   requests:
+  #     cpu: 50m
+  #     memory: 16Mi
 
   # logLevel controls how verbose metrics-fetcher is when writing to stderr.
   # Inherits top-level logLevel by default.
@@ -273,13 +273,13 @@ metricsCache:
 
   # resources lets you limit and request cluster resources for metrics-cache.
   # see: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  resources:
-    limits:
-      cpu: 500m
-      memory: 500Mi
-    requests:
-      cpu: 150m
-      memory: 200Mi
+  # resources:
+  #   limits:
+  #     cpu: 500m
+  #     memory: 500Mi
+  #   requests:
+  #     cpu: 150m
+  #     memory: 200Mi
 
   # pullAddress is the address to bind to for pull mode. By default it binds to
   # all available IPv4 interfaces (0.0.0.0). For an IPv6-only cluster, you might
