@@ -54,6 +54,10 @@ impl Scraper for LinuxAgentScraper {
 
         debug!("running check_mk_agent");
         let child = Command::new(AGENT_PATH)
+            .env(
+                "CHECKMK_KUBERNETES_AGENT_VERSION",
+                env!("CARGO_PKG_VERSION"),
+            )
             .env("PYTHONDONTWRITEBYTECODE", "1")
             .stdin(Stdio::null())
             .stdout(Stdio::piped())

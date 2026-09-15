@@ -16,6 +16,7 @@ RUN cargo build --release --target "$(uname -m)-unknown-linux-musl"
 
 FROM alpine:3.23 AS node-scraper
 ARG CMK_AGENT_SOURCE_TAG="v2.5.0p9"
+ENV CMK_AGENT_SOURCE_TAG=${CMK_AGENT_SOURCE_TAG}
 ARG CHECKMK_AGENT_DIR="/opt/omd/versions/default/share/check_mk/agents"
 ARG CHECKMK_AGENT_PLUGIN_DIR="${CHECKMK_AGENT_DIR}/plugins"
 RUN wget https://raw.githubusercontent.com/Checkmk/checkmk/refs/tags/${CMK_AGENT_SOURCE_TAG}/agents/check_mk_agent.openwrt &&\
@@ -45,6 +46,7 @@ ENTRYPOINT ["cluster-aggregator"]
 
 FROM alpine:3.23 AS node-scraper-dev
 ARG CMK_AGENT_SOURCE_TAG="v2.5.0p9"
+ENV CMK_AGENT_SOURCE_TAG=${CMK_AGENT_SOURCE_TAG}
 ARG CHECKMK_AGENT_DIR="/opt/omd/versions/default/share/check_mk/agents"
 ARG CHECKMK_AGENT_PLUGIN_DIR="${CHECKMK_AGENT_DIR}/plugins"
 RUN wget https://raw.githubusercontent.com/Checkmk/checkmk/refs/tags/${CMK_AGENT_SOURCE_TAG}/agents/check_mk_agent.openwrt &&\

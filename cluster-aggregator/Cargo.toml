@@ -1,6 +1,6 @@
 [package]
 name = "cluster-aggregator"
-version = "1.1000.0"  # must be < 2.0.0 for Checkmk to be happy.
+version.workspace = true
 license.workspace = true
 edition.workspace = true
 readme.workspace = true

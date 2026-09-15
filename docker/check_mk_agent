@@ -15,8 +15,8 @@ MK_SOURCE_AGENT=1
 HOST_PATH_PREFIX="/host"
 
 echo "<<<check_mk>>>"
-echo "Version: VERSION_CMK"
-echo "AgentOS: kube VERSION_AGENT"
+echo "Version: ${CMK_AGENT_SOURCE_TAG#v}"
+echo "AgentOS: kube ${CHECKMK_KUBERNETES_AGENT_VERSION}"
 
 main_setup
 # check_mk_agent.openwrt
