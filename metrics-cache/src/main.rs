@@ -116,10 +116,10 @@ async fn main() -> anyhow::Result<()> {
     let otel_client = match &args.otel_endpoint {
         Some(base_url) => {
             info!("OpenTelemetry enabled, will push metrics to OpenTelemetry collector");
-            // TODO: Auth, etc.
             Some(OtelClient::new(
                 base_url,
                 args.otel_ca_cert_file.as_deref(),
+                args.otel_basic_auth(),
             )?)
         }
         None => None,

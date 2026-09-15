@@ -1,8 +1,11 @@
 use clap::Parser;
+use clap::builder::NonEmptyStringValueParser;
 use regex::Regex;
 use std::path::PathBuf;
 use std::time::Duration;
 use thiserror::Error;
+
+use crate::otel::client::BasicAuth;
 
 pub struct TlsConfig {
     pub secret_name: Option<String>,
@@ -274,6 +277,25 @@ pub struct CliArgs {
     )]
     pub otel_push_interval: Duration,
 
+    /// Username for basic-auth against the OTel collector. A username
+    /// without a password is allowed
+    #[arg(
+        long,
+        env = "RUSTIK_OTEL_USERNAME",
+        value_parser = NonEmptyStringValueParser::new(),
+    )]
+    pub otel_username: Option<String>,
+
+    /// Password for basic-auth against the OTel collector. Requires a
+    /// username
+    #[arg(
+        long,
+        env = "RUSTIK_OTEL_PASSWORD",
+        hide_env_values = true,
+        requires = "otel_username"
+    )]
+    pub otel_password: Option<String>,
+
     /// How often (seconds) to query the Kubernetes API health endpoints /readyz
     /// and /livez
     #[arg(long, value_parser = parse_interval, default_value = "45")]
@@ -335,6 +357,13 @@ impl CliArgs {
             service_name: self.pull_service_name.clone(),
             longevity: self.pull_tls_secret_generation_validity,
         }
+    }
+
+    pub fn otel_basic_auth(&self) -> Option<BasicAuth> {
+        self.otel_username.clone().map(|username| BasicAuth {
+            username,
+            password: self.otel_password.clone(),
+        })
     }
 }
 
@@ -545,5 +574,30 @@ mod tests {
             configured.push_certificate_renewal_threshold,
             Duration::from_hours(24 * 30)
         );
+    }
+
+    #[test]
+    fn otel_password_requires_a_username() {
+        assert_eq!(
+            parse(&["--otel-password", "McBobberson"])
+                .expect_err("a password without a username should fail")
+                .kind(),
+            ErrorKind::MissingRequiredArgument
+        );
+    }
+
+    #[test]
+    fn otel_username_rejects_an_empty_value() {
+        assert!(parse(&["--otel-username", ""]).is_err());
+    }
+
+    #[test]
+    fn otel_username_without_password_is_valid() {
+        let args = parse(&["--otel-username", "bob"]).expect("a lone username should parse");
+        let auth = args
+            .otel_basic_auth()
+            .expect("a username means credentials");
+        assert_eq!(auth.username, "bob");
+        assert_eq!(auth.password, None);
     }
 }
