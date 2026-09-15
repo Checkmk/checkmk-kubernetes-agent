@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["duration_to_secs"],"struct":["KubeAgentHealthV1","MetricsCacheMetadata","MetricsFetcherIngestionHealth","NodeMetricsFetcherHealth","ReflectorHealth"]};

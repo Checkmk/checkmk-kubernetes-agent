@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["ClusterAggregatorBuildInfo","NodeNodeScraperHealth","NodeScraperDaemonSet","NodeScraperIngestionHealth","ReflectorHealth","SelfHealth"]};

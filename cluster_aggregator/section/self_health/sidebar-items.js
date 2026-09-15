@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["duration_to_secs"],"struct":["ClusterAggregatorMetadata","KubeAgentHealthV1","NodeNodeScraperHealth","NodeScraperIngestionHealth","ReflectorHealth"]};

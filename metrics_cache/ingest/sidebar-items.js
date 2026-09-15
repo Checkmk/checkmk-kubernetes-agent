@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["api_health","kubelet_health","kubelet_stats","reflectors","system_agent"],"struct":["MetricsFetcherIngestion","MetricsFetcherMetadata"]};
