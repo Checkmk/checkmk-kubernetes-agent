@@ -28,7 +28,7 @@
 <a href=#28 id=28 data-nosnippet>28</a><span class="doccomment">/// Ingestion shares state with the rest of the application, but is considered
 <a href=#29 id=29 data-nosnippet>29</a>/// its own app for purposes of TLS termination: We want node-scraper to be
 <a href=#30 id=30 data-nosnippet>30</a>/// able to communicate to cluster-aggregator using a separate set of TLS credentials
-<a href=#31 id=31 data-nosnippet>31</a>/// than anything else which talks to metrics cache (such as an Ingress).
+<a href=#31 id=31 data-nosnippet>31</a>/// than anything else which talks to the cluster aggregator (such as an Ingress).
 <a href=#32 id=32 data-nosnippet>32</a></span><span class="kw">pub fn </span>ingest_app&lt;V: TokenValidator&gt;(state: AppState&lt;V&gt;) -&gt; Router {
 <a href=#33 id=33 data-nosnippet>33</a>    <span class="kw">let </span>routes = Router::new()
 <a href=#34 id=34 data-nosnippet>34</a>        .route(
