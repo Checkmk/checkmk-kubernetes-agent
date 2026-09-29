@@ -209,9 +209,19 @@
 <a href=#209 id=209 data-nosnippet>209</a>            ),
 <a href=#210 id=210 data-nosnippet>210</a>        ];
 <a href=#211 id=211 data-nosnippet>211</a>
-<a href=#212 id=212 data-nosnippet>212</a>        <span class="kw">let </span>request: ExportMetricsServiceRequest = entities.into_iter().collect();
+<a href=#212 id=212 data-nosnippet>212</a>        <span class="kw">let </span><span class="kw-2">mut </span>request: ExportMetricsServiceRequest = entities.into_iter().collect();
 <a href=#213 id=213 data-nosnippet>213</a>
-<a href=#214 id=214 data-nosnippet>214</a>        <span class="macro">insta::assert_debug_snapshot!</span>(request);
-<a href=#215 id=215 data-nosnippet>215</a>    }
-<a href=#216 id=216 data-nosnippet>216</a>}
+<a href=#214 id=214 data-nosnippet>214</a>        <span class="kw">for </span>resource_metrics <span class="kw">in </span><span class="kw-2">&amp;mut </span>request.resource_metrics {
+<a href=#215 id=215 data-nosnippet>215</a>            <span class="kw">for </span>scope_metrics <span class="kw">in </span><span class="kw-2">&amp;mut </span>resource_metrics.scope_metrics {
+<a href=#216 id=216 data-nosnippet>216</a>                <span class="kw">let </span><span class="prelude-val">Some</span>(scope) = scope_metrics.scope.as_mut() <span class="kw">else </span>{
+<a href=#217 id=217 data-nosnippet>217</a>                    <span class="macro">panic!</span>(<span class="string">"scope metrics must contain an instrumentation scope"</span>);
+<a href=#218 id=218 data-nosnippet>218</a>                };
+<a href=#219 id=219 data-nosnippet>219</a>                <span class="macro">assert_eq!</span>(scope.version, <span class="macro">env!</span>(<span class="string">"CARGO_PKG_VERSION"</span>));
+<a href=#220 id=220 data-nosnippet>220</a>                scope.version = <span class="string">"1.1000.0"</span>.to_string();
+<a href=#221 id=221 data-nosnippet>221</a>            }
+<a href=#222 id=222 data-nosnippet>222</a>        }
+<a href=#223 id=223 data-nosnippet>223</a>
+<a href=#224 id=224 data-nosnippet>224</a>        <span class="macro">insta::assert_debug_snapshot!</span>(request);
+<a href=#225 id=225 data-nosnippet>225</a>    }
+<a href=#226 id=226 data-nosnippet>226</a>}
 </code></pre></div></section></main></body></html>

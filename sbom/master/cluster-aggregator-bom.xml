@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:133d95cb-f09f-4c74-9b88-cd044db2f63a" version="1">
+<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:bde4a06c-c719-438f-bf5f-d461f6376b41" version="1">
   <metadata>
-    <timestamp>2026-09-19T22:20:40.286116409Z</timestamp>
+    <timestamp>2026-09-29T23:58:09.894405793Z</timestamp>
     <tools>
       <tool>
         <vendor>CycloneDX</vendor>
@@ -9,14 +9,14 @@
         <version>0.5.9</version>
       </tool>
     </tools>
-    <component type="application" bom-ref="path+file:///home/runner/work/checkmk-kubernetes-agent/checkmk-kubernetes-agent/cluster-aggregator#1.1000.0">
+    <component type="application" bom-ref="path+file:///home/runner/work/checkmk-kubernetes-agent/checkmk-kubernetes-agent/cluster-aggregator#3.0.0">
       <name>cluster-aggregator</name>
-      <version>1.1000.0</version>
+      <version>3.0.0</version>
       <scope>required</scope>
       <licenses>
         <expression>GPL-2.0-only</expression>
       </licenses>
-      <purl>pkg:cargo/cluster-aggregator@1.1000.0?download_url=file://.</purl>
+      <purl>pkg:cargo/cluster-aggregator@3.0.0?download_url=file://.</purl>
       <externalReferences>
         <reference type="website">
           <url>https://www.checkmk.com/</url>
@@ -26,15 +26,15 @@
         </reference>
       </externalReferences>
       <components>
-        <component type="library" bom-ref="path+file:///home/runner/work/checkmk-kubernetes-agent/checkmk-kubernetes-agent/cluster-aggregator#1.1000.0 bin-target-0">
+        <component type="library" bom-ref="path+file:///home/runner/work/checkmk-kubernetes-agent/checkmk-kubernetes-agent/cluster-aggregator#3.0.0 bin-target-0">
           <name>cluster_aggregator</name>
-          <version>1.1000.0</version>
-          <purl>pkg:cargo/cluster-aggregator@1.1000.0?download_url=file://.#src/lib.rs</purl>
+          <version>3.0.0</version>
+          <purl>pkg:cargo/cluster-aggregator@3.0.0?download_url=file://.#src/lib.rs</purl>
         </component>
-        <component type="application" bom-ref="path+file:///home/runner/work/checkmk-kubernetes-agent/checkmk-kubernetes-agent/cluster-aggregator#1.1000.0 bin-target-1">
+        <component type="application" bom-ref="path+file:///home/runner/work/checkmk-kubernetes-agent/checkmk-kubernetes-agent/cluster-aggregator#3.0.0 bin-target-1">
           <name>cluster-aggregator</name>
-          <version>1.1000.0</version>
-          <purl>pkg:cargo/cluster-aggregator@1.1000.0?download_url=file://.#src/main.rs</purl>
+          <version>3.0.0</version>
+          <purl>pkg:cargo/cluster-aggregator@3.0.0?download_url=file://.#src/main.rs</purl>
         </component>
       </components>
     </component>
@@ -5738,7 +5738,7 @@
     </component>
   </components>
   <dependencies>
-    <dependency ref="path+file:///home/runner/work/checkmk-kubernetes-agent/checkmk-kubernetes-agent/cluster-aggregator#1.1000.0">
+    <dependency ref="path+file:///home/runner/work/checkmk-kubernetes-agent/checkmk-kubernetes-agent/cluster-aggregator#3.0.0">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#anyhow@1.0.104" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#axum@0.8.9" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#axum-server@0.8.0" />

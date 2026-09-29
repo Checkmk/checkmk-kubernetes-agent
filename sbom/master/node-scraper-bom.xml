@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:1f052b50-1b82-40ef-badb-885d620bea73" version="1">
+<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:e7faa825-4af5-4048-99ae-6c1ebb69f72d" version="1">
   <metadata>
-    <timestamp>2026-09-19T22:20:40.291582724Z</timestamp>
+    <timestamp>2026-09-29T23:58:09.898729537Z</timestamp>
     <tools>
       <tool>
         <vendor>CycloneDX</vendor>
@@ -9,14 +9,14 @@
         <version>0.5.9</version>
       </tool>
     </tools>
-    <component type="application" bom-ref="path+file:///home/runner/work/checkmk-kubernetes-agent/checkmk-kubernetes-agent/node-scraper#2.0.0">
+    <component type="application" bom-ref="path+file:///home/runner/work/checkmk-kubernetes-agent/checkmk-kubernetes-agent/node-scraper#3.0.0">
       <name>node-scraper</name>
-      <version>2.0.0</version>
+      <version>3.0.0</version>
       <scope>required</scope>
       <licenses>
         <expression>GPL-2.0-only</expression>
       </licenses>
-      <purl>pkg:cargo/node-scraper@2.0.0?download_url=file://.</purl>
+      <purl>pkg:cargo/node-scraper@3.0.0?download_url=file://.</purl>
       <externalReferences>
         <reference type="website">
           <url>https://www.checkmk.com/</url>
@@ -26,10 +26,10 @@
         </reference>
       </externalReferences>
       <components>
-        <component type="application" bom-ref="path+file:///home/runner/work/checkmk-kubernetes-agent/checkmk-kubernetes-agent/node-scraper#2.0.0 bin-target-0">
+        <component type="application" bom-ref="path+file:///home/runner/work/checkmk-kubernetes-agent/checkmk-kubernetes-agent/node-scraper#3.0.0 bin-target-0">
           <name>node-scraper</name>
-          <version>2.0.0</version>
-          <purl>pkg:cargo/node-scraper@2.0.0?download_url=file://.#src/main.rs</purl>
+          <version>3.0.0</version>
+          <purl>pkg:cargo/node-scraper@3.0.0?download_url=file://.#src/main.rs</purl>
         </component>
       </components>
     </component>
@@ -3060,7 +3060,7 @@
     </component>
   </components>
   <dependencies>
-    <dependency ref="path+file:///home/runner/work/checkmk-kubernetes-agent/checkmk-kubernetes-agent/node-scraper#2.0.0">
+    <dependency ref="path+file:///home/runner/work/checkmk-kubernetes-agent/checkmk-kubernetes-agent/node-scraper#3.0.0">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#anyhow@1.0.104" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#bytes@1.12.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#clap@4.6.3" />

@@ -54,34 +54,38 @@
 <a href=#54 id=54 data-nosnippet>54</a>
 <a href=#55 id=55 data-nosnippet>55</a>        <span class="macro">debug!</span>(<span class="string">"running check_mk_agent"</span>);
 <a href=#56 id=56 data-nosnippet>56</a>        <span class="kw">let </span>child = Command::new(AGENT_PATH)
-<a href=#57 id=57 data-nosnippet>57</a>            .env(<span class="string">"PYTHONDONTWRITEBYTECODE"</span>, <span class="string">"1"</span>)
-<a href=#58 id=58 data-nosnippet>58</a>            .stdin(Stdio::null())
-<a href=#59 id=59 data-nosnippet>59</a>            .stdout(Stdio::piped())
-<a href=#60 id=60 data-nosnippet>60</a>            .stderr(Stdio::piped())
-<a href=#61 id=61 data-nosnippet>61</a>            .kill_on_drop(<span class="bool-val">true</span>)
-<a href=#62 id=62 data-nosnippet>62</a>            .spawn()<span class="question-mark">?</span>;
-<a href=#63 id=63 data-nosnippet>63</a>
-<a href=#64 id=64 data-nosnippet>64</a>        <span class="kw">let </span>agent_timeout = <span class="self">self</span>.args.system_agent_timeout;
-<a href=#65 id=65 data-nosnippet>65</a>        <span class="kw">let </span>output = timeout(agent_timeout, child.wait_with_output())
-<a href=#66 id=66 data-nosnippet>66</a>            .<span class="kw">await
-<a href=#67 id=67 data-nosnippet>67</a>            </span>.map_err(|<span class="kw">_</span>| Error::AgentTimeout(agent_timeout))<span class="question-mark">??</span>;
-<a href=#68 id=68 data-nosnippet>68</a>
-<a href=#69 id=69 data-nosnippet>69</a>        <span class="kw">if </span>!output.status.success() {
-<a href=#70 id=70 data-nosnippet>70</a>            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::AgentExitStatus {
-<a href=#71 id=71 data-nosnippet>71</a>                status: output.status,
-<a href=#72 id=72 data-nosnippet>72</a>                stderr: String::from_utf8_lossy(<span class="kw-2">&amp;</span>output.stderr).into_owned(),
-<a href=#73 id=73 data-nosnippet>73</a>            });
-<a href=#74 id=74 data-nosnippet>74</a>        }
-<a href=#75 id=75 data-nosnippet>75</a>
-<a href=#76 id=76 data-nosnippet>76</a>        <span class="kw">if </span>output.stdout.is_empty() {
-<a href=#77 id=77 data-nosnippet>77</a>            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::AgentEmptyOutput);
+<a href=#57 id=57 data-nosnippet>57</a>            .env(
+<a href=#58 id=58 data-nosnippet>58</a>                <span class="string">"CHECKMK_KUBERNETES_AGENT_VERSION"</span>,
+<a href=#59 id=59 data-nosnippet>59</a>                <span class="macro">env!</span>(<span class="string">"CARGO_PKG_VERSION"</span>),
+<a href=#60 id=60 data-nosnippet>60</a>            )
+<a href=#61 id=61 data-nosnippet>61</a>            .env(<span class="string">"PYTHONDONTWRITEBYTECODE"</span>, <span class="string">"1"</span>)
+<a href=#62 id=62 data-nosnippet>62</a>            .stdin(Stdio::null())
+<a href=#63 id=63 data-nosnippet>63</a>            .stdout(Stdio::piped())
+<a href=#64 id=64 data-nosnippet>64</a>            .stderr(Stdio::piped())
+<a href=#65 id=65 data-nosnippet>65</a>            .kill_on_drop(<span class="bool-val">true</span>)
+<a href=#66 id=66 data-nosnippet>66</a>            .spawn()<span class="question-mark">?</span>;
+<a href=#67 id=67 data-nosnippet>67</a>
+<a href=#68 id=68 data-nosnippet>68</a>        <span class="kw">let </span>agent_timeout = <span class="self">self</span>.args.system_agent_timeout;
+<a href=#69 id=69 data-nosnippet>69</a>        <span class="kw">let </span>output = timeout(agent_timeout, child.wait_with_output())
+<a href=#70 id=70 data-nosnippet>70</a>            .<span class="kw">await
+<a href=#71 id=71 data-nosnippet>71</a>            </span>.map_err(|<span class="kw">_</span>| Error::AgentTimeout(agent_timeout))<span class="question-mark">??</span>;
+<a href=#72 id=72 data-nosnippet>72</a>
+<a href=#73 id=73 data-nosnippet>73</a>        <span class="kw">if </span>!output.status.success() {
+<a href=#74 id=74 data-nosnippet>74</a>            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::AgentExitStatus {
+<a href=#75 id=75 data-nosnippet>75</a>                status: output.status,
+<a href=#76 id=76 data-nosnippet>76</a>                stderr: String::from_utf8_lossy(<span class="kw-2">&amp;</span>output.stderr).into_owned(),
+<a href=#77 id=77 data-nosnippet>77</a>            });
 <a href=#78 id=78 data-nosnippet>78</a>        }
 <a href=#79 id=79 data-nosnippet>79</a>
-<a href=#80 id=80 data-nosnippet>80</a>        <span class="macro">trace!</span>(bytes = output.stdout.len(), <span class="string">"check_mk_agent run complete"</span>);
-<a href=#81 id=81 data-nosnippet>81</a>        <span class="prelude-val">Ok</span>(Payload::CheckmkLinuxAgent {
-<a href=#82 id=82 data-nosnippet>82</a>            node_name,
-<a href=#83 id=83 data-nosnippet>83</a>            body: Bytes::from(output.stdout),
-<a href=#84 id=84 data-nosnippet>84</a>        })
-<a href=#85 id=85 data-nosnippet>85</a>    }
-<a href=#86 id=86 data-nosnippet>86</a>}
+<a href=#80 id=80 data-nosnippet>80</a>        <span class="kw">if </span>output.stdout.is_empty() {
+<a href=#81 id=81 data-nosnippet>81</a>            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::AgentEmptyOutput);
+<a href=#82 id=82 data-nosnippet>82</a>        }
+<a href=#83 id=83 data-nosnippet>83</a>
+<a href=#84 id=84 data-nosnippet>84</a>        <span class="macro">trace!</span>(bytes = output.stdout.len(), <span class="string">"check_mk_agent run complete"</span>);
+<a href=#85 id=85 data-nosnippet>85</a>        <span class="prelude-val">Ok</span>(Payload::CheckmkLinuxAgent {
+<a href=#86 id=86 data-nosnippet>86</a>            node_name,
+<a href=#87 id=87 data-nosnippet>87</a>            body: Bytes::from(output.stdout),
+<a href=#88 id=88 data-nosnippet>88</a>        })
+<a href=#89 id=89 data-nosnippet>89</a>    }
+<a href=#90 id=90 data-nosnippet>90</a>}
 </code></pre></div></section></main></body></html>
