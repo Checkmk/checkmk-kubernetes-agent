@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:bde4a06c-c719-438f-bf5f-d461f6376b41" version="1">
+<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:bdff2f9f-8c8b-4a13-924b-efb31baca4f5" version="1">
   <metadata>
-    <timestamp>2026-09-29T23:58:09.894405793Z</timestamp>
+    <timestamp>2026-09-30T00:07:01.579230882Z</timestamp>
     <tools>
       <tool>
         <vendor>CycloneDX</vendor>
@@ -3189,18 +3189,18 @@
         </reference>
       </externalReferences>
     </component>
-    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry-proto@0.32.0">
+    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry-proto@0.33.0">
       <name>opentelemetry-proto</name>
-      <version>0.32.0</version>
+      <version>0.33.0</version>
       <description>Protobuf generated files and transformations.</description>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">56d658ba1faf63f7b9c492cfbe6e0ec365440a16132d3270c1065f7b33f1b638</hash>
+        <hash alg="SHA-256">25da1ac11a0aeccf38d7f77ee0348715adaf8340f65ad46c94a02c6b20e2f65d</hash>
       </hashes>
       <licenses>
         <expression>Apache-2.0</expression>
       </licenses>
-      <purl>pkg:cargo/opentelemetry-proto@0.32.0</purl>
+      <purl>pkg:cargo/opentelemetry-proto@0.33.0</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/open-telemetry/opentelemetry-rust/tree/main/opentelemetry-proto</url>
@@ -3210,18 +3210,18 @@
         </reference>
       </externalReferences>
     </component>
-    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry@0.32.0">
+    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry@0.33.0">
       <name>opentelemetry</name>
-      <version>0.32.0</version>
+      <version>0.33.0</version>
       <description>OpenTelemetry API for Rust</description>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">b0142c63252a9e054e68a4c61a5778f7b14f576274d593f8ce883d191a099682</hash>
+        <hash alg="SHA-256">6cdb0b1b267eb9db3331b434ed9ddab10d50e280a9adf9d13e5233e2002b61b5</hash>
       </hashes>
       <licenses>
         <expression>Apache-2.0</expression>
       </licenses>
-      <purl>pkg:cargo/opentelemetry@0.32.0</purl>
+      <purl>pkg:cargo/opentelemetry@0.33.0</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/open-telemetry/opentelemetry-rust/tree/main/opentelemetry</url>
@@ -3231,18 +3231,18 @@
         </reference>
       </externalReferences>
     </component>
-    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry_sdk@0.32.1">
+    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry_sdk@0.33.0">
       <name>opentelemetry_sdk</name>
-      <version>0.32.1</version>
+      <version>0.33.0</version>
       <description>The SDK for the OpenTelemetry metrics collection and distributed tracing framework</description>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">9b59f80e1ac4d5ff7a2db8fb6c80badb7f0f3f858211fba08dd9aaec750894f9</hash>
+        <hash alg="SHA-256">cb39533d9d1c912123efd7d41d7e0c29d16917b60ce15b4c8d87cb1af7f67520</hash>
       </hashes>
       <licenses>
         <expression>Apache-2.0</expression>
       </licenses>
-      <purl>pkg:cargo/opentelemetry_sdk@0.32.1</purl>
+      <purl>pkg:cargo/opentelemetry_sdk@0.33.0</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/open-telemetry/opentelemetry-rust/tree/main/opentelemetry-sdk</url>
@@ -5750,7 +5750,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#k8s-openapi@0.28.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#kube@4.2.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#moka@0.12.16" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry-proto@0.32.0" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry-proto@0.33.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#os-release@0.1.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#parking_lot@0.12.5" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#prost@0.14.4" />
@@ -6421,17 +6421,17 @@
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#once_cell@1.21.4" />
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#openssl-probe@0.2.1" />
-    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry-proto@0.32.0">
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry@0.32.0" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry_sdk@0.32.1" />
+    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry-proto@0.33.0">
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry@0.33.0" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry_sdk@0.33.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#prost@0.14.4" />
     </dependency>
-    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry@0.32.0" />
-    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry_sdk@0.32.1">
+    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry@0.33.0" />
+    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry_sdk@0.33.0">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#futures-channel@0.3.34" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#futures-executor@0.3.32" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#futures-util@0.3.34" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry@0.32.0" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry@0.33.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.20" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#ordered-float@2.10.1">
