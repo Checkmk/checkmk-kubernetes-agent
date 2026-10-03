@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:bdff2f9f-8c8b-4a13-924b-efb31baca4f5" version="1">
+<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:164d9eca-6667-4771-8dd0-68ceb347d9da" version="1">
   <metadata>
-    <timestamp>2026-09-30T00:07:01.579230882Z</timestamp>
+    <timestamp>2026-10-03T21:11:18.516182971Z</timestamp>
     <tools>
       <tool>
         <vendor>CycloneDX</vendor>
@@ -4697,38 +4697,38 @@
         </reference>
       </externalReferences>
     </component>
-    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#thiserror-impl@2.0.20">
+    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#thiserror-impl@2.0.21">
       <author>David Tolnay &lt;dtolnay@gmail.com></author>
       <name>thiserror-impl</name>
-      <version>2.0.20</version>
+      <version>2.0.21</version>
       <description>Implementation detail of the `thiserror` crate</description>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">bc04cd3e1236dd4a98afca4569f2deb3f120e5422a4023be2cb683f8486292af</hash>
+        <hash alg="SHA-256">fe5197923287db20a58125f0bc85c062f7f2c892de97b18c356f9efb14b28524</hash>
       </hashes>
       <licenses>
         <expression>MIT OR Apache-2.0</expression>
       </licenses>
-      <purl>pkg:cargo/thiserror-impl@2.0.20</purl>
+      <purl>pkg:cargo/thiserror-impl@2.0.21</purl>
       <externalReferences>
         <reference type="vcs">
           <url>https://github.com/dtolnay/thiserror</url>
         </reference>
       </externalReferences>
     </component>
-    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.20">
+    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21">
       <author>David Tolnay &lt;dtolnay@gmail.com></author>
       <name>thiserror</name>
-      <version>2.0.20</version>
+      <version>2.0.21</version>
       <description>derive(Error)</description>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">ec86235f5fcc2a73650310756d2ac5b138a5780bbbdfae3eeccec992c435ba4f</hash>
+        <hash alg="SHA-256">09e52cb86a36cede5cb101bf8908837b3e4c6e5e59fe7fd85c23fb56200d189e</hash>
       </hashes>
       <licenses>
         <expression>MIT OR Apache-2.0</expression>
       </licenses>
-      <purl>pkg:cargo/thiserror@2.0.20</purl>
+      <purl>pkg:cargo/thiserror@2.0.21</purl>
       <externalReferences>
         <reference type="documentation">
           <url>https://docs.rs/thiserror</url>
@@ -5761,7 +5761,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#subtle@2.6.1" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.20" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#time@0.3.55" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-http@0.7.1" />
@@ -5824,7 +5824,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#nom@7.1.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#num-traits@0.2.19" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#rusticata-macros@4.1.0" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.20" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#time@0.3.55" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#async-broadcast@0.7.2">
@@ -6271,14 +6271,14 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#jsonptr@0.7.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.20" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#jsonpath-rust@1.0.4">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pest@2.8.6" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pest_derive@2.8.6" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#regex@1.13.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.20" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#jsonptr@0.7.1">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229" />
@@ -6313,7 +6313,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde-saphyr@0.0.29" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.20" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio-util@0.7.18" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower@0.5.3" />
@@ -6330,7 +6330,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde-value@0.7.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.20" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#kube-runtime@4.2.0">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#ahash@0.8.12" />
@@ -6348,7 +6348,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pin-project@1.1.13" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.20" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio-util@0.7.18" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tracing@0.1.44" />
@@ -6432,7 +6432,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#futures-executor@0.3.32" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#futures-util@0.3.34" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#opentelemetry@0.33.0" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.20" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#ordered-float@2.10.1">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#num-traits@0.2.19" />
@@ -6700,13 +6700,13 @@
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#terminal_size@0.4.4">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#rustix@1.1.4" />
     </dependency>
-    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror-impl@2.0.20">
+    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror-impl@2.0.21">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#proc-macro2@1.0.106" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#quote@1.0.45" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#syn@3.0.0" />
     </dependency>
-    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.20">
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror-impl@2.0.20" />
+    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21">
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror-impl@2.0.21" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thread_local@1.1.9">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#cfg-if@1.0.4" />
@@ -6859,7 +6859,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#oid-registry@0.8.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#ring@0.17.14" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#rusticata-macros@4.1.0" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.20" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#time@0.3.55" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#yasna@0.6.0">
