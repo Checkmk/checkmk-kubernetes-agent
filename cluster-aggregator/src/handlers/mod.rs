@@ -17,7 +17,7 @@ pub fn pull_app<V: TokenValidator>(state: AppState<V>, pull: PullAgentMiddleware
         ));
 
     Router::new()
-        .route("/", get(|| async { "foo" }))
+        .route("/", get(|| async {}))
         .nest("/pull", routes)
         .route("/livez", get(health::livez))
         .route("/readyz", get(health::readyz))
