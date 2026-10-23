@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:09de32bb-1f4f-4c97-9548-5156ebf432e7" version="1">
+<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:5844948c-26df-4e7a-9e32-63e3effad45c" version="1">
   <metadata>
-    <timestamp>2026-10-12T04:44:21.098672729Z</timestamp>
+    <timestamp>2026-10-23T11:25:52.865683395Z</timestamp>
     <tools>
       <tool>
         <vendor>CycloneDX</vendor>
@@ -4251,19 +4251,18 @@
         </reference>
       </externalReferences>
     </component>
-    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151">
-      <author>Erick Tryzelaar &lt;erick.tryzelaar@gmail.com>, David Tolnay &lt;dtolnay@gmail.com></author>
+    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.154">
       <name>serde_json</name>
-      <version>1.0.151</version>
+      <version>1.0.154</version>
       <description>A JSON serialization file format</description>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14</hash>
+        <hash alg="SHA-256">e7e9cc8b1b85264074fbcc02a88680c4096b1e47df8f739dceb03bf482f04bd6</hash>
       </hashes>
       <licenses>
         <expression>MIT OR Apache-2.0</expression>
       </licenses>
-      <purl>pkg:cargo/serde_json@1.0.151</purl>
+      <purl>pkg:cargo/serde_json@1.0.154</purl>
       <externalReferences>
         <reference type="documentation">
           <url>https://docs.rs/serde_json</url>
@@ -4907,19 +4906,19 @@
         </reference>
       </externalReferences>
     </component>
-    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2">
+    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3">
       <author>Tokio Contributors &lt;team@tokio.rs></author>
       <name>tokio</name>
-      <version>1.53.2</version>
+      <version>1.53.3</version>
       <description>An event-driven, non-blocking I/O platform for writing asynchronous I/O backed applications. </description>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">e95f91fcc7a621e8b030f6aa23c71fe9838ae2fb4d8118b75602a328f5144044</hash>
+        <hash alg="SHA-256">ce3335fa71841cda333a58d7615b03901380ecf09d59b3296d21f8bbac0dde4e</hash>
       </hashes>
       <licenses>
         <expression>MIT</expression>
       </licenses>
-      <purl>pkg:cargo/tokio@1.53.2</purl>
+      <purl>pkg:cargo/tokio@1.53.3</purl>
       <externalReferences>
         <reference type="website">
           <url>https://tokio.rs</url>
@@ -5384,19 +5383,19 @@
         </reference>
       </externalReferences>
     </component>
-    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#uuid@1.27.0">
+    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#uuid@1.28.0">
       <author>Ashley Mannix&lt;ashleymannix@live.com.au>, Dylan DPC&lt;dylan.dpc@gmail.com>, Hunar Roop Kahlon&lt;hunar.roop@gmail.com></author>
       <name>uuid</name>
-      <version>1.27.0</version>
+      <version>1.28.0</version>
       <description>A library to generate and parse UUIDs.</description>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">97277d36b9c3ace13e58fa6e753f8b0bbbf302a18dd193240d70f9e29681059a</hash>
+        <hash alg="SHA-256">7cc1186384beb7dd8eedea376413fd654937285ea6c9cfbb928dc3043ea4b606</hash>
       </hashes>
       <licenses>
         <expression>Apache-2.0 OR MIT</expression>
       </licenses>
-      <purl>pkg:cargo/uuid@1.27.0</purl>
+      <purl>pkg:cargo/uuid@1.28.0</purl>
       <externalReferences>
         <reference type="documentation">
           <url>https://docs.rs/uuid</url>
@@ -5759,16 +5758,16 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#reqwest@0.13.5" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#rustls@0.23.45" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.154" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#subtle@2.6.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#time@0.3.55" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-http@0.7.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tracing@0.1.44" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tracing-subscriber@0.3.23" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#url@2.5.8" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#uuid@1.27.0" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#uuid@1.28.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#x509-parser@0.18.1" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#adler2@2.0.1" />
@@ -5837,7 +5836,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#compression-codecs@0.4.38" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#compression-core@0.4.32" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.17" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#async-lock@3.4.2">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#event-listener@5.4.1" />
@@ -5881,7 +5880,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.17" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#rustls@0.23.45" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#rustls-pki-types@1.14.1" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio-rustls@0.26.4" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-service@0.3.3" />
     </dependency>
@@ -5902,11 +5901,11 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#percent-encoding@2.3.2" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.17" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_core@1.0.229" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.154" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_path_to_error@0.1.20" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_urlencoded@0.7.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#sync_wrapper@1.0.2" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower@0.5.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-layer@0.3.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-service@0.3.3" />
@@ -5914,7 +5913,7 @@
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#backon@1.6.0">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#fastrand@2.4.1" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#base64@0.22.1" />
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#base64@0.23.1" />
@@ -6050,7 +6049,7 @@
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#fs-err@3.3.0">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#autocfg@1.5.0" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#futures-channel@0.3.34">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#futures-core@0.3.34" />
@@ -6118,7 +6117,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#http@1.5.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#indexmap@2.14.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#slab@0.4.12" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio-util@0.7.18" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tracing@0.1.44" />
     </dependency>
@@ -6157,7 +6156,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#log@0.4.29" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#rustls@0.23.45" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#rustls-native-certs@0.8.3" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio-rustls@0.26.4" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-service@0.3.3" />
     </dependency>
@@ -6165,7 +6164,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#hyper@1.9.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#hyper-util@0.1.20" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.17" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-service@0.3.3" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#hyper-util@0.1.20">
@@ -6181,7 +6180,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#percent-encoding@2.3.2" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.17" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#socket2@0.6.3" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-service@0.3.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tracing@0.1.44" />
     </dependency>
@@ -6198,7 +6197,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#itoa@1.0.18" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.17" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#smallvec@1.15.1" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#want@0.3.1" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#icu_collections@2.2.0">
@@ -6270,25 +6269,25 @@
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#json-patch@4.2.0">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#jsonptr@0.7.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.154" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#jsonpath-rust@1.0.4">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pest@2.8.6" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pest_derive@2.8.6" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#regex@1.13.1" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.154" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#jsonptr@0.7.1">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.154" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#k8s-openapi@0.28.0">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#base64@0.22.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#jiff@0.2.24" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.154" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#kube-client@4.2.0">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#base64@0.22.1" />
@@ -6312,9 +6311,9 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#secrecy@0.10.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde-saphyr@0.0.29" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.154" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio-util@0.7.18" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower@0.5.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-http@0.6.11" />
@@ -6329,7 +6328,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#k8s-openapi@0.28.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde-value@0.7.0" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.154" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#kube-runtime@4.2.0">
@@ -6347,9 +6346,9 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#parking_lot@0.12.5" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pin-project@1.1.13" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.154" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio-util@0.7.18" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tracing@0.1.44" />
     </dependency>
@@ -6397,7 +6396,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#portable-atomic@1.13.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#smallvec@1.15.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tagptr@0.2.0" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#uuid@1.27.0" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#uuid@1.28.0" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#nohash-hasher@0.2.0" />
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#nom@7.1.3">
@@ -6552,10 +6551,10 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#rustls-pki-types@1.14.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#rustls-platform-verifier@0.7.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.154" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_urlencoded@0.7.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#sync_wrapper@1.0.2" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio-rustls@0.26.4" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower@0.5.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-http@0.6.11" />
@@ -6640,7 +6639,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#quote@1.0.45" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#syn@3.0.0" />
     </dependency>
-    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.151">
+    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.154">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#itoa@1.0.18" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#memchr@2.8.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#serde_core@1.0.229" />
@@ -6735,7 +6734,7 @@
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio-rustls@0.26.4">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#rustls@0.23.45" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio-util@0.7.18">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#bytes@1.12.1" />
@@ -6743,9 +6742,9 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#futures-sink@0.3.34" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.17" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#slab@0.4.12" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
     </dependency>
-    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2">
+    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#bytes@1.12.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#libc@0.2.186" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#mio@1.2.0" />
@@ -6778,7 +6777,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#http-body@1.0.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#percent-encoding@2.3.2" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.17" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio-util@0.7.18" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-layer@0.3.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-service@0.3.3" />
@@ -6790,7 +6789,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#futures-util@0.3.34" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.17" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#sync_wrapper@1.0.2" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.2" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.53.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio-util@0.7.18" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-layer@0.3.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-service@0.3.3" />
@@ -6842,7 +6841,7 @@
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#utf8_iter@1.0.4" />
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#utf8parse@0.2.2" />
-    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#uuid@1.27.0">
+    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#uuid@1.28.0">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#getrandom@0.4.2" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#version_check@0.9.5" />
