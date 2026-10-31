@@ -13,9 +13,13 @@ ready-to-go Checkmk sections.
 Interested in what we are doing? Grab a
 [daily build](https://checkmk.com/download/archive#checkmk-dailies) of Checkmk
 and a copy of this repo and
-[try the agent in your cluster](https://github.com/checkmk/checkmk-kubernetes-agent/wiki/Testing-on-an-unmodified-Checkmk).
+[try the agent in your cluster](https://github.com/Checkmk/checkmk-kubernetes-agent/wiki/Developing-on-an-unmodified-Checkmk).
 Later in this `README.md`, you will find a list of dependencies to get the
 development environment spun up.
+
+Alternatively, you can graph a Checkmk daily build and simply use the new
+Kubernetes Quick Setup which will guide you through setting up Checkmk
+Kubernetes Agent in your existing Kubernetes cluster.
 
 We build images on each push to `master` and have a rolling `0.0.0-master`
 release of our Helm chart. You can give it a try with:
