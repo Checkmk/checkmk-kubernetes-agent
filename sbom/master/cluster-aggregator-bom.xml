@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:b59d0710-a253-469d-a2ec-4be93ab89fbf" version="1">
+<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:3952d23a-60cd-4a51-8a51-8522bdda22c0" version="1">
   <metadata>
-    <timestamp>2026-10-31T16:52:44.163393303Z</timestamp>
+    <timestamp>2026-10-31T16:54:21.540522586Z</timestamp>
     <tools>
       <tool>
         <vendor>CycloneDX</vendor>
@@ -5383,19 +5383,19 @@
         </reference>
       </externalReferences>
     </component>
-    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#uuid@1.28.0">
+    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#uuid@1.29.0">
       <author>Ashley Mannix&lt;ashleymannix@live.com.au>, Dylan DPC&lt;dylan.dpc@gmail.com>, Hunar Roop Kahlon&lt;hunar.roop@gmail.com></author>
       <name>uuid</name>
-      <version>1.28.0</version>
+      <version>1.29.0</version>
       <description>A library to generate and parse UUIDs.</description>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">7cc1186384beb7dd8eedea376413fd654937285ea6c9cfbb928dc3043ea4b606</hash>
+        <hash alg="SHA-256">4a0e2d11620c50695fe12bbbfde96b3477fe606e7284c22d505c12ce51214514</hash>
       </hashes>
       <licenses>
         <expression>Apache-2.0 OR MIT</expression>
       </licenses>
-      <purl>pkg:cargo/uuid@1.28.0</purl>
+      <purl>pkg:cargo/uuid@1.29.0</purl>
       <externalReferences>
         <reference type="documentation">
           <url>https://docs.rs/uuid</url>
@@ -5767,7 +5767,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tracing@0.1.44" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tracing-subscriber@0.3.23" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#url@2.5.8" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#uuid@1.28.0" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#uuid@1.29.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#x509-parser@0.18.1" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#adler2@2.0.1" />
@@ -6396,7 +6396,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#portable-atomic@1.13.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#smallvec@1.15.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tagptr@0.2.0" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#uuid@1.28.0" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#uuid@1.29.0" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#nohash-hasher@0.2.0" />
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#nom@7.1.3">
@@ -6841,7 +6841,7 @@
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#utf8_iter@1.0.4" />
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#utf8parse@0.2.2" />
-    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#uuid@1.28.0">
+    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#uuid@1.29.0">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#getrandom@0.4.2" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#version_check@0.9.5" />
