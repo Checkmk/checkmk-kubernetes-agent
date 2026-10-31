@@ -4,3 +4,15 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    allow:
+      - dependency-type: all
+    cooldown:
+      default-days: 7
+    groups:
+      # k8s-openapi must match the version kube depends on, so they move
+      # together. A new k8s-openapi usually lands before kube supports it,
+      # making this PR red until the matching kube release arrives.
+      kube:
+        patterns: ["kube", "kube-*", "k8s-openapi"]
+      cargo-minor-patch:
+        update-types: ["minor", "patch"]
