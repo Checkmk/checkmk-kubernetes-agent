@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:87c06b88-1972-4e44-b2f2-91b89e9b8331" version="1">
+<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:50b65d02-f511-4e01-9ffe-23c12665efed" version="1">
   <metadata>
-    <timestamp>2026-11-14T11:18:34.168063010Z</timestamp>
+    <timestamp>2026-11-14T11:21:05.874660478Z</timestamp>
     <tools>
       <tool>
         <vendor>CycloneDX</vendor>
@@ -537,19 +537,19 @@
         </reference>
       </externalReferences>
     </component>
-    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#axum-server@0.8.0">
+    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#axum-server@0.9.0">
       <author>Programatik &lt;programatik29@gmail.com>, Adi Salimgereev &lt;adisalimgereev@gmail.com></author>
       <name>axum-server</name>
-      <version>0.8.0</version>
+      <version>0.9.0</version>
       <description>High level server designed to be used with axum framework.</description>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">b1df331683d982a0b9492b38127151e6453639cd34926eb9c07d4cd8c6d22bfc</hash>
+        <hash alg="SHA-256">f2c55b0e6ae7c8951bc27682e97934423357c1a8208886305290a3adb1ce3c14</hash>
       </hashes>
       <licenses>
         <expression>MIT</expression>
       </licenses>
-      <purl>pkg:cargo/axum-server@0.8.0</purl>
+      <purl>pkg:cargo/axum-server@0.9.0</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/programatik29/axum-server</url>
@@ -5872,7 +5872,7 @@
     <dependency ref="path+file:///home/runner/work/checkmk-kubernetes-agent/checkmk-kubernetes-agent/cluster-aggregator#3.0.0">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#anyhow@1.0.104" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#axum@0.8.9" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#axum-server@0.8.0" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#axum-server@0.9.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#bytes@1.12.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#clap@4.6.7" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#flate2@1.1.11" />
@@ -6003,7 +6003,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-service@0.3.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tracing@0.1.44" />
     </dependency>
-    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#axum-server@0.8.0">
+    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#axum-server@0.9.0">
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#arc-swap@1.9.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#bytes@1.12.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#either@1.19.0" />
@@ -6015,6 +6015,7 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.17" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#rustls@0.23.46" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#rustls-pki-types@1.15.1" />
+      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#socket2@0.6.5" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio@1.54.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio-rustls@0.26.6" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-service@0.3.3" />
