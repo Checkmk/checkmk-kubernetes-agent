@@ -102,7 +102,7 @@ pub fn deployment(name: &str) -> Deployment {
             ])),
             ..Default::default()
         },
-        spec: Some(DeploymentSpec {
+        spec: DeploymentSpec {
             selector: LabelSelector {
                 match_labels: Some(BTreeMap::from([(s("app"), name.to_string())])),
                 match_expressions: Some(vec![LabelSelectorRequirement {
@@ -112,7 +112,7 @@ pub fn deployment(name: &str) -> Deployment {
                 }]),
             },
             ..Default::default()
-        }),
+        },
         ..Default::default()
     }
 }
@@ -132,7 +132,7 @@ pub fn daemonset(name: &str) -> DaemonSet {
             ])),
             ..Default::default()
         },
-        spec: Some(DaemonSetSpec {
+        spec: DaemonSetSpec {
             selector: LabelSelector {
                 match_labels: Some(BTreeMap::from([(s("app"), name.to_string())])),
                 match_expressions: Some(vec![LabelSelectorRequirement {
@@ -142,7 +142,7 @@ pub fn daemonset(name: &str) -> DaemonSet {
                 }]),
             },
             ..Default::default()
-        }),
+        },
         ..Default::default()
     }
 }
@@ -162,7 +162,7 @@ pub fn statefulset(name: &str) -> StatefulSet {
             ])),
             ..Default::default()
         },
-        spec: Some(StatefulSetSpec {
+        spec: StatefulSetSpec {
             selector: LabelSelector {
                 match_labels: Some(BTreeMap::from([(s("app"), name.to_string())])),
                 match_expressions: Some(vec![LabelSelectorRequirement {
@@ -172,7 +172,7 @@ pub fn statefulset(name: &str) -> StatefulSet {
                 }]),
             },
             ..Default::default()
-        }),
+        },
         ..Default::default()
     }
 }

@@ -25,7 +25,6 @@ impl<'a> KubeDaemonSetInfoV1<'a> {
         containers: ThinContainers<'a>,
         settings: &'a HostSettings,
     ) -> Option<Self> {
-        let spec = daemonset.spec.as_ref()?;
         Some(Self {
             name: daemonset.metadata.name.as_deref()?,
             namespace: daemonset.metadata.namespace.as_deref()?,
@@ -46,7 +45,7 @@ impl<'a> KubeDaemonSetInfoV1<'a> {
                 .as_ref()
                 .map(|annotations| settings.annotation_key_pattern.filter(annotations))
                 .unwrap_or_default(),
-            selector: Selector::from_label_selector(&spec.selector),
+            selector: Selector::from_label_selector(&daemonset.spec.selector),
             containers,
             cluster: &settings.cluster_name,
             kubernetes_cluster_hostname: &settings.cluster_host_name,

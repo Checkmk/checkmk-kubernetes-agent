@@ -25,7 +25,6 @@ impl<'a> KubeStatefulSetInfoV1<'a> {
         containers: ThinContainers<'a>,
         settings: &'a HostSettings,
     ) -> Option<Self> {
-        let spec = statefulset.spec.as_ref()?;
         Some(Self {
             name: statefulset.metadata.name.as_deref()?,
             namespace: statefulset.metadata.namespace.as_deref()?,
@@ -46,7 +45,7 @@ impl<'a> KubeStatefulSetInfoV1<'a> {
                 .as_ref()
                 .map(|annotations| settings.annotation_key_pattern.filter(annotations))
                 .unwrap_or_default(),
-            selector: Selector::from_label_selector(&spec.selector),
+            selector: Selector::from_label_selector(&statefulset.spec.selector),
             containers,
             cluster: &settings.cluster_name,
             kubernetes_cluster_hostname: &settings.cluster_host_name,
@@ -69,11 +68,10 @@ pub(crate) struct KubeStatefulSetReplicasV1 {
 
 impl KubeStatefulSetReplicasV1 {
     pub(crate) fn from_statefulset(statefulset: &StatefulSet) -> Option<Self> {
-        let spec = statefulset.spec.as_ref()?;
         let status = statefulset.status.as_ref()?;
         Some(Self {
             available: status.available_replicas.unwrap_or(0),
-            desired: spec.replicas?,
+            desired: statefulset.spec.replicas?,
             ready: status.ready_replicas.unwrap_or(0),
             updated: status.updated_replicas.unwrap_or(0),
         })
@@ -111,23 +109,9 @@ mod tests {
     }
 
     #[test]
-    fn kube_statefulset_info_v1_without_spec() {
-        let mut statefulset = statefulset("database");
-        statefulset.spec = None;
-        assert!(
-            KubeStatefulSetInfoV1::from_statefulset(
-                &statefulset,
-                ThinContainers::from_pods(std::iter::empty()),
-                &host_settings(),
-            )
-            .is_none()
-        )
-    }
-
-    #[test]
     fn kube_statefulset_replicas_v1() {
         let mut statefulset = statefulset("database");
-        statefulset.spec.as_mut().unwrap().replicas = Some(5);
+        statefulset.spec.replicas = Some(5);
         statefulset.status = Some(StatefulSetStatus {
             available_replicas: Some(4),
             ready_replicas: Some(3),
@@ -142,7 +126,7 @@ mod tests {
     #[test]
     fn statefulset_replicas_default_missing_status_counts() {
         let mut statefulset = statefulset("database");
-        statefulset.spec.as_mut().unwrap().replicas = Some(0);
+        statefulset.spec.replicas = Some(0);
         statefulset.status = Some(StatefulSetStatus::default());
 
         let replicas = KubeStatefulSetReplicasV1::from_statefulset(&statefulset).unwrap();

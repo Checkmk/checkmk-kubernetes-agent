@@ -78,11 +78,7 @@ impl PiggybackHost for DaemonSet<'_> {
         {
             out.push(WriteableSection::of(&me, &kube_daemonset_replicas_v1));
         }
-        let min_ready_seconds = self
-            .api
-            .spec
-            .as_ref()
-            .and_then(|spec| spec.min_ready_seconds);
+        let min_ready_seconds = self.api.spec.min_ready_seconds;
         out.push(WriteableSection::of(
             &me,
             &KubeControllerSpecV1::new(min_ready_seconds),
