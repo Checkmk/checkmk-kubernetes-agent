@@ -27,7 +27,7 @@ pub(crate) struct KubeUpdateStrategyV1 {
 
 impl KubeUpdateStrategyV1 {
     pub(crate) fn from_statefulset(statefulset: &StatefulSet) -> Option<Self> {
-        let strategy = statefulset.spec.as_ref()?.update_strategy.as_ref()?;
+        let strategy = statefulset.spec.update_strategy.as_ref()?;
         let strategy = match strategy.type_.as_deref()? {
             "OnDelete" => UpdateStrategy::OnDelete,
             "RollingUpdate" => {
@@ -43,7 +43,7 @@ impl KubeUpdateStrategyV1 {
     }
 
     pub(crate) fn from_deployment(deployment: &Deployment) -> Option<Self> {
-        let strategy = deployment.spec.as_ref()?.strategy.as_ref()?;
+        let strategy = deployment.spec.strategy.as_ref()?;
         let strategy = match strategy.type_.as_deref()? {
             "Recreate" => UpdateStrategy::Recreate,
             "RollingUpdate" => {
@@ -59,7 +59,7 @@ impl KubeUpdateStrategyV1 {
     }
 
     pub(crate) fn from_daemonset(daemonset: &DaemonSet) -> Option<Self> {
-        let strategy = daemonset.spec.as_ref()?.update_strategy.as_ref()?;
+        let strategy = daemonset.spec.update_strategy.as_ref()?;
         let strategy = match strategy.type_.as_deref()? {
             "OnDelete" => UpdateStrategy::OnDelete,
             "RollingUpdate" => {
@@ -93,13 +93,13 @@ mod tests {
     #[test]
     fn deployment_update_strategy() {
         let deployment = Deployment {
-            spec: Some(DeploymentSpec {
+            spec: DeploymentSpec {
                 strategy: Some(DeploymentStrategy {
                     type_: Some("Recreate".to_owned()),
                     ..Default::default()
                 }),
                 ..Default::default()
-            }),
+            },
             ..Default::default()
         };
 
@@ -109,7 +109,7 @@ mod tests {
     #[test]
     fn daemonset_update_strategy() {
         let mut daemonset = daemonset("node-agent");
-        daemonset.spec.as_mut().unwrap().update_strategy = Some(DaemonSetUpdateStrategy {
+        daemonset.spec.update_strategy = Some(DaemonSetUpdateStrategy {
             type_: Some("RollingUpdate".to_owned()),
             rolling_update: Some(RollingUpdateDaemonSet {
                 max_surge: Some(IntOrString::Int(0)),
@@ -123,7 +123,7 @@ mod tests {
     #[test]
     fn statefulset_update_strategy() {
         let statefulset = StatefulSet {
-            spec: Some(StatefulSetSpec {
+            spec: StatefulSetSpec {
                 update_strategy: Some(StatefulSetUpdateStrategy {
                     type_: Some("RollingUpdate".to_owned()),
                     rolling_update: Some(RollingUpdateStatefulSetStrategy {
@@ -132,7 +132,7 @@ mod tests {
                     }),
                 }),
                 ..Default::default()
-            }),
+            },
             ..Default::default()
         };
 

@@ -25,7 +25,6 @@ impl<'a> KubeDeploymentInfoV1<'a> {
         containers: ThinContainers<'a>,
         settings: &'a HostSettings,
     ) -> Option<KubeDeploymentInfoV1<'a>> {
-        let spec = deployment.spec.as_ref()?;
         let section = KubeDeploymentInfoV1 {
             name: deployment.metadata.name.as_deref()?,
             namespace: deployment.metadata.namespace.as_deref()?,
@@ -46,7 +45,7 @@ impl<'a> KubeDeploymentInfoV1<'a> {
                 .as_ref()
                 .map(|m| settings.annotation_key_pattern.filter(m))
                 .unwrap_or_default(),
-            selector: Selector::from_label_selector(&spec.selector),
+            selector: Selector::from_label_selector(&deployment.spec.selector),
             containers,
             cluster: &settings.cluster_name,
             kubernetes_cluster_hostname: &settings.cluster_host_name,
@@ -71,11 +70,10 @@ pub(crate) struct KubeDeploymentReplicasV1 {
 
 impl KubeDeploymentReplicasV1 {
     pub(crate) fn from_deployment(deployment: &Deployment) -> Option<Self> {
-        let spec = deployment.spec.as_ref()?;
         let status = deployment.status.as_ref()?;
         Some(Self {
             available: status.available_replicas.unwrap_or(0),
-            desired: spec.replicas?,
+            desired: deployment.spec.replicas?,
             ready: status.ready_replicas.unwrap_or(0),
             updated: status.updated_replicas.unwrap_or(0),
             terminating: status.terminating_replicas,
@@ -99,7 +97,7 @@ impl<'a> DeploymentConditionValue<'a> {
     fn from_condition(condition: &'a DeploymentCondition) -> Option<Self> {
         let last_transition_time = condition.last_transition_time.as_ref()?;
         Some(Self {
-            status: &condition.status,
+            status: condition.status.as_deref()?,
             last_transition_time: last_transition_time.0.as_millisecond() as f64 / 1000.0,
             reason: condition.reason.as_deref()?,
             message: condition.message.as_deref()?,
@@ -124,14 +122,11 @@ impl<'a> KubeDeploymentConditionsV1<'a> {
 
         let mut section = Self::default();
         for condition in conditions {
-            let target = if condition.type_.eq_ignore_ascii_case("Available") {
-                &mut section.available
-            } else if condition.type_.eq_ignore_ascii_case("Progressing") {
-                &mut section.progressing
-            } else if condition.type_.eq_ignore_ascii_case("ReplicaFailure") {
-                &mut section.replicafailure
-            } else {
-                continue;
+            let target = match condition.type_.as_deref() {
+                Some(t) if t.eq_ignore_ascii_case("Available") => &mut section.available,
+                Some(t) if t.eq_ignore_ascii_case("Progressing") => &mut section.progressing,
+                Some(t) if t.eq_ignore_ascii_case("ReplicaFailure") => &mut section.replicafailure,
+                _ => continue,
             };
             *target = Some(DeploymentConditionValue::from_condition(condition)?);
         }
@@ -155,8 +150,8 @@ mod tests {
 
     fn condition(type_: &str, status: &str, reason: &str, message: &str) -> DeploymentCondition {
         DeploymentCondition {
-            type_: type_.to_owned(),
-            status: status.to_owned(),
+            type_: Some(type_.to_owned()),
+            status: Some(status.to_owned()),
             last_transition_time: Some(Time(
                 "2024-06-19 15:22:45-04".parse::<Timestamp>().unwrap(),
             )),
@@ -188,20 +183,9 @@ mod tests {
     }
 
     #[test]
-    fn kube_deployment_info_v1_without_spec() {
-        let mut deployment = deployment("nginx");
-        deployment.spec = None;
-        let containers = ThinContainers::from_pods(std::iter::empty());
-        assert!(
-            KubeDeploymentInfoV1::from_deployment(&deployment, containers, &host_settings())
-                .is_none()
-        );
-    }
-
-    #[test]
     fn kube_deployment_replicas_v1() {
         let mut deployment = deployment("nginx");
-        deployment.spec.as_mut().unwrap().replicas = Some(5);
+        deployment.spec.replicas = Some(5);
         deployment.status = Some(DeploymentStatus {
             available_replicas: Some(4),
             ready_replicas: Some(3),
@@ -217,7 +201,7 @@ mod tests {
     #[test]
     fn deployment_replicas_default_missing_status_counts() {
         let mut deployment = deployment("nginx");
-        deployment.spec.as_mut().unwrap().replicas = Some(0);
+        deployment.spec.replicas = Some(0);
         deployment.status = Some(DeploymentStatus::default());
 
         let replicas = KubeDeploymentReplicasV1::from_deployment(&deployment).unwrap();
