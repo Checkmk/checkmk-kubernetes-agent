@@ -78,22 +78,18 @@
 <a href=#78 id=78 data-nosnippet>78</a>        {
 <a href=#79 id=79 data-nosnippet>79</a>            out.push(WriteableSection::of(<span class="kw-2">&amp;</span>me, <span class="kw-2">&amp;</span>kube_daemonset_replicas_v1));
 <a href=#80 id=80 data-nosnippet>80</a>        }
-<a href=#81 id=81 data-nosnippet>81</a>        <span class="kw">let </span>min_ready_seconds = <span class="self">self
-<a href=#82 id=82 data-nosnippet>82</a>            </span>.api
-<a href=#83 id=83 data-nosnippet>83</a>            .spec
-<a href=#84 id=84 data-nosnippet>84</a>            .as_ref()
-<a href=#85 id=85 data-nosnippet>85</a>            .and_then(|spec| spec.min_ready_seconds);
-<a href=#86 id=86 data-nosnippet>86</a>        out.push(WriteableSection::of(
-<a href=#87 id=87 data-nosnippet>87</a>            <span class="kw-2">&amp;</span>me,
-<a href=#88 id=88 data-nosnippet>88</a>            <span class="kw-2">&amp;</span>KubeControllerSpecV1::new(min_ready_seconds),
-<a href=#89 id=89 data-nosnippet>89</a>        ));
-<a href=#90 id=90 data-nosnippet>90</a>        out.extend(<span class="self">self</span>.aggregation_sections(<span class="kw-2">&amp;</span>me));
-<a href=#91 id=91 data-nosnippet>91</a>        <span class="kw">if </span><span class="self">self</span>.settings.emit_pvc_sections
-<a href=#92 id=92 data-nosnippet>92</a>            &amp;&amp; <span class="kw">let </span><span class="prelude-val">Some</span>(namespace) = <span class="self">self</span>.meta.namespace
-<a href=#93 id=93 data-nosnippet>93</a>        {
-<a href=#94 id=94 data-nosnippet>94</a>            out.extend(<span class="self">self</span>.pvc_sections(<span class="kw-2">&amp;</span>me, namespace));
-<a href=#95 id=95 data-nosnippet>95</a>        }
-<a href=#96 id=96 data-nosnippet>96</a>        out
-<a href=#97 id=97 data-nosnippet>97</a>    }
-<a href=#98 id=98 data-nosnippet>98</a>}
+<a href=#81 id=81 data-nosnippet>81</a>        <span class="kw">let </span>min_ready_seconds = <span class="self">self</span>.api.spec.min_ready_seconds;
+<a href=#82 id=82 data-nosnippet>82</a>        out.push(WriteableSection::of(
+<a href=#83 id=83 data-nosnippet>83</a>            <span class="kw-2">&amp;</span>me,
+<a href=#84 id=84 data-nosnippet>84</a>            <span class="kw-2">&amp;</span>KubeControllerSpecV1::new(min_ready_seconds),
+<a href=#85 id=85 data-nosnippet>85</a>        ));
+<a href=#86 id=86 data-nosnippet>86</a>        out.extend(<span class="self">self</span>.aggregation_sections(<span class="kw-2">&amp;</span>me));
+<a href=#87 id=87 data-nosnippet>87</a>        <span class="kw">if </span><span class="self">self</span>.settings.emit_pvc_sections
+<a href=#88 id=88 data-nosnippet>88</a>            &amp;&amp; <span class="kw">let </span><span class="prelude-val">Some</span>(namespace) = <span class="self">self</span>.meta.namespace
+<a href=#89 id=89 data-nosnippet>89</a>        {
+<a href=#90 id=90 data-nosnippet>90</a>            out.extend(<span class="self">self</span>.pvc_sections(<span class="kw-2">&amp;</span>me, namespace));
+<a href=#91 id=91 data-nosnippet>91</a>        }
+<a href=#92 id=92 data-nosnippet>92</a>        out
+<a href=#93 id=93 data-nosnippet>93</a>    }
+<a href=#94 id=94 data-nosnippet>94</a>}
 </code></pre></div></section></main></body></html>

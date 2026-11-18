@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:4cc3b985-b479-4e04-b33d-b7772b607426" version="1">
+<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:e36f4b88-5165-4503-adee-2cbb140ab41d" version="1">
   <metadata>
-    <timestamp>2026-11-14T11:21:05.879170761Z</timestamp>
+    <timestamp>2026-11-18T00:41:49.658509548Z</timestamp>
     <tools>
       <tool>
         <vendor>CycloneDX</vendor>
@@ -170,28 +170,6 @@
       <externalReferences>
         <reference type="vcs">
           <url>https://github.com/smol-rs/atomic-waker</url>
-        </reference>
-      </externalReferences>
-    </component>
-    <component type="library" bom-ref="registry+https://github.com/rust-lang/crates.io-index#base64@0.22.1">
-      <author>Marshall Pierce &lt;marshall@mpierce.org></author>
-      <name>base64</name>
-      <version>0.22.1</version>
-      <description>encodes and decodes base64 as bytes or utf8</description>
-      <scope>required</scope>
-      <hashes>
-        <hash alg="SHA-256">72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6</hash>
-      </hashes>
-      <licenses>
-        <expression>MIT OR Apache-2.0</expression>
-      </licenses>
-      <purl>pkg:cargo/base64@0.22.1</purl>
-      <externalReferences>
-        <reference type="documentation">
-          <url>https://docs.rs/base64</url>
-        </reference>
-        <reference type="vcs">
-          <url>https://github.com/marshallpierce/rust-base64</url>
         </reference>
       </externalReferences>
     </component>
@@ -3231,7 +3209,6 @@
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#anstyle@1.0.14" />
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#anyhow@1.0.104" />
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#atomic-waker@1.1.2" />
-    <dependency ref="registry+https://github.com/rust-lang/crates.io-index#base64@0.22.1" />
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#base64@0.23.1" />
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#bitflags@2.13.2" />
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#bytes@1.12.1" />
@@ -3662,18 +3639,15 @@
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tokio-macros@2.7.2" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-http@0.6.11">
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#base64@0.22.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#bitflags@2.13.2" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#bytes@1.12.1" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#futures-util@0.3.34" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#http@1.5.0" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#http-body@1.1.0" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#mime@0.3.18" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.17" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower@0.5.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-layer@0.3.3" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-service@0.3.3" />
-      <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tracing@0.1.44" />
       <dependency ref="registry+https://github.com/rust-lang/crates.io-index#url@2.5.8" />
     </dependency>
     <dependency ref="registry+https://github.com/rust-lang/crates.io-index#tower-layer@0.3.3" />

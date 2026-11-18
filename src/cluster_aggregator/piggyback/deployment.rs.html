@@ -76,32 +76,28 @@
 <a href=#76 id=76 data-nosnippet>76</a>        <span class="kw">if let </span><span class="prelude-val">Some</span>(kube_update_strategy_v1) = KubeUpdateStrategyV1::from_deployment(<span class="self">self</span>.api) {
 <a href=#77 id=77 data-nosnippet>77</a>            out.push(WriteableSection::of(<span class="kw-2">&amp;</span>me, <span class="kw-2">&amp;</span>kube_update_strategy_v1));
 <a href=#78 id=78 data-nosnippet>78</a>        }
-<a href=#79 id=79 data-nosnippet>79</a>        <span class="kw">let </span>min_ready_seconds = <span class="self">self
-<a href=#80 id=80 data-nosnippet>80</a>            </span>.api
-<a href=#81 id=81 data-nosnippet>81</a>            .spec
-<a href=#82 id=82 data-nosnippet>82</a>            .as_ref()
-<a href=#83 id=83 data-nosnippet>83</a>            .and_then(|spec| spec.min_ready_seconds);
-<a href=#84 id=84 data-nosnippet>84</a>        out.push(WriteableSection::of(
-<a href=#85 id=85 data-nosnippet>85</a>            <span class="kw-2">&amp;</span>me,
-<a href=#86 id=86 data-nosnippet>86</a>            <span class="kw-2">&amp;</span>KubeControllerSpecV1::new(min_ready_seconds),
-<a href=#87 id=87 data-nosnippet>87</a>        ));
-<a href=#88 id=88 data-nosnippet>88</a>        out.extend(<span class="self">self</span>.aggregation_sections(<span class="kw-2">&amp;</span>me));
-<a href=#89 id=89 data-nosnippet>89</a>        <span class="kw">if </span><span class="self">self</span>.settings.emit_pvc_sections
-<a href=#90 id=90 data-nosnippet>90</a>            &amp;&amp; <span class="kw">let </span><span class="prelude-val">Some</span>(namespace) = <span class="self">self</span>.meta.namespace
-<a href=#91 id=91 data-nosnippet>91</a>        {
-<a href=#92 id=92 data-nosnippet>92</a>            out.extend(<span class="self">self</span>.pvc_sections(<span class="kw-2">&amp;</span>me, namespace));
-<a href=#93 id=93 data-nosnippet>93</a>        }
-<a href=#94 id=94 data-nosnippet>94</a>        <span class="kw">if let </span><span class="prelude-val">Some</span>(kube_deployment_replicas_v1) =
-<a href=#95 id=95 data-nosnippet>95</a>            KubeDeploymentReplicasV1::from_deployment(<span class="self">self</span>.api)
-<a href=#96 id=96 data-nosnippet>96</a>        {
-<a href=#97 id=97 data-nosnippet>97</a>            out.push(WriteableSection::of(<span class="kw-2">&amp;</span>me, <span class="kw-2">&amp;</span>kube_deployment_replicas_v1));
-<a href=#98 id=98 data-nosnippet>98</a>        }
-<a href=#99 id=99 data-nosnippet>99</a>        <span class="kw">if let </span><span class="prelude-val">Some</span>(kube_deployment_conditions_v1) =
-<a href=#100 id=100 data-nosnippet>100</a>            KubeDeploymentConditionsV1::from_deployment(<span class="self">self</span>.api)
-<a href=#101 id=101 data-nosnippet>101</a>        {
-<a href=#102 id=102 data-nosnippet>102</a>            out.push(WriteableSection::of(<span class="kw-2">&amp;</span>me, <span class="kw-2">&amp;</span>kube_deployment_conditions_v1));
-<a href=#103 id=103 data-nosnippet>103</a>        }
-<a href=#104 id=104 data-nosnippet>104</a>        out
-<a href=#105 id=105 data-nosnippet>105</a>    }
-<a href=#106 id=106 data-nosnippet>106</a>}
+<a href=#79 id=79 data-nosnippet>79</a>        <span class="kw">let </span>min_ready_seconds = <span class="self">self</span>.api.spec.min_ready_seconds;
+<a href=#80 id=80 data-nosnippet>80</a>        out.push(WriteableSection::of(
+<a href=#81 id=81 data-nosnippet>81</a>            <span class="kw-2">&amp;</span>me,
+<a href=#82 id=82 data-nosnippet>82</a>            <span class="kw-2">&amp;</span>KubeControllerSpecV1::new(min_ready_seconds),
+<a href=#83 id=83 data-nosnippet>83</a>        ));
+<a href=#84 id=84 data-nosnippet>84</a>        out.extend(<span class="self">self</span>.aggregation_sections(<span class="kw-2">&amp;</span>me));
+<a href=#85 id=85 data-nosnippet>85</a>        <span class="kw">if </span><span class="self">self</span>.settings.emit_pvc_sections
+<a href=#86 id=86 data-nosnippet>86</a>            &amp;&amp; <span class="kw">let </span><span class="prelude-val">Some</span>(namespace) = <span class="self">self</span>.meta.namespace
+<a href=#87 id=87 data-nosnippet>87</a>        {
+<a href=#88 id=88 data-nosnippet>88</a>            out.extend(<span class="self">self</span>.pvc_sections(<span class="kw-2">&amp;</span>me, namespace));
+<a href=#89 id=89 data-nosnippet>89</a>        }
+<a href=#90 id=90 data-nosnippet>90</a>        <span class="kw">if let </span><span class="prelude-val">Some</span>(kube_deployment_replicas_v1) =
+<a href=#91 id=91 data-nosnippet>91</a>            KubeDeploymentReplicasV1::from_deployment(<span class="self">self</span>.api)
+<a href=#92 id=92 data-nosnippet>92</a>        {
+<a href=#93 id=93 data-nosnippet>93</a>            out.push(WriteableSection::of(<span class="kw-2">&amp;</span>me, <span class="kw-2">&amp;</span>kube_deployment_replicas_v1));
+<a href=#94 id=94 data-nosnippet>94</a>        }
+<a href=#95 id=95 data-nosnippet>95</a>        <span class="kw">if let </span><span class="prelude-val">Some</span>(kube_deployment_conditions_v1) =
+<a href=#96 id=96 data-nosnippet>96</a>            KubeDeploymentConditionsV1::from_deployment(<span class="self">self</span>.api)
+<a href=#97 id=97 data-nosnippet>97</a>        {
+<a href=#98 id=98 data-nosnippet>98</a>            out.push(WriteableSection::of(<span class="kw-2">&amp;</span>me, <span class="kw-2">&amp;</span>kube_deployment_conditions_v1));
+<a href=#99 id=99 data-nosnippet>99</a>        }
+<a href=#100 id=100 data-nosnippet>100</a>        out
+<a href=#101 id=101 data-nosnippet>101</a>    }
+<a href=#102 id=102 data-nosnippet>102</a>}
 </code></pre></div></section></main></body></html>
